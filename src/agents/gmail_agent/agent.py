@@ -1,36 +1,36 @@
 """Agent module."""
 
 from dotenv import load_dotenv
-from pydantic_ai import Agent, RunContext
+from pydantic_ai import Agent
+from pydantic import BaseModel
+from a2a.types import AgentSkill
 
-from src.mcp_handler.mcp_gmail import server as gmail_server
+from src.mcp_servers import gmail_server
+from src.agents.common.agent import load_agent_config
 
 load_dotenv(override=True)
 
+gmail_agent_config = load_agent_config("src/agents/gmail_agent/config.yml")
+
+
+class GmailAgentCard(BaseModel):
+    """
+    Gmail Agent Card.
+    """
+
+    name: str = gmail_agent_config.name
+    description: str = gmail_agent_config.description
+    skills: list[AgentSkill] = []
+    organization: str = gmail_agent_config.name
+    url: str = gmail_agent_config.endpoint
+
+
 gmail_agent = Agent(
-    model="google-gla:gemini-2.5-flash",
+    model=gmail_agent_config.model,
     mcp_servers=[gmail_server],
-    name="gmail_agent",
+    name=gmail_agent_config.name,
+    system_prompt=gmail_agent_config.system_prompt,
 )
-
-
-@gmail_agent.system_prompt
-def review_agent_system_prompt(ctx: RunContext) -> str:
-    """
-    Return the system prompt string describing the Gmail agent's role and capabilities.
-
-    Parameters:
-        ctx (RunContext): The execution context for the agent.
-
-    Returns:
-        str: The system prompt for the Gmail agent.
-    """
-    return """
-You are a Gmail agent.
-You are given a task to create a new email in Gmail.
-You are also given a list of emails that are already in Gmail.
-You are also given a list of emails that are already in Gmail.
-"""
 
 
 async def run_gmail_agent(task: str) -> str:

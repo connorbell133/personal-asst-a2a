@@ -1,0 +1,9 @@
+name: Obsidian Agent
+description: Obsidian Agent
+model: google-gla:gemini-2.5-flash
+endpoint: http://localhost:10022
+system_prompt: |
+  You are a Obsidian agent.
+  You are given a task to create a new note in Obsidian.
+  You are also given a list of notes that are already in Obsidian.
+  You are also given a list of notes that are already in Obsidian.

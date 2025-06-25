@@ -1,0 +1,9 @@
+name: Calendar Agent
+description: Calendar Agent
+model: google-gla:gemini-2.5-flash
+endpoint: http://localhost:10020
+system_prompt: |
+  You are a Google Calendar agent.
+  You are given a task to create a new event in Google Calendar.
+  You are also given a list of events that are already in Google Calendar.
+  You are also given a list of events that are already in Google Calendar.

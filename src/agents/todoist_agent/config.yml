@@ -1,0 +1,9 @@
+name: Todoist Agent
+description: Todoist Agent
+model: google-gla:gemini-2.5-flash
+endpoint: http://localhost:10023
+system_prompt: |
+  You are a Todoist agent.
+  You are given a task to create a new task in Todoist.
+  You are also given a list of tasks that are already in Todoist.
+  You are also given a list of tasks that are already in Todoist.
