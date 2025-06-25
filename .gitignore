@@ -8,7 +8,7 @@ build/
 dist/
 wheels/
 *.egg-info
-
+gcp-oauth.keys.json
 # Virtual environments
 .venv
 
