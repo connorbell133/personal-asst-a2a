@@ -1,4 +1,4 @@
-.env.example
+
 uv.lock
 .ruff_cache/
 show_tree.py
