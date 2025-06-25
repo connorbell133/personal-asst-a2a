@@ -1,7 +1,6 @@
 import asyncio
 import time
 import logfire
-from typing import Callable, Dict
 from a2a.server.apps import A2AStarletteApplication
 from src.agents.common.agent import run_agent_in_background
 from src.agents.common.server import create_agent_a2a_server

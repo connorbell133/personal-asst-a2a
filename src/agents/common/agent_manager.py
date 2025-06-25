@@ -1,6 +1,6 @@
 """Agent Manager for handling agent registration and server creation."""
 
-from typing import Dict, List, Type, Callable
+from typing import Dict, List, Type
 from dataclasses import dataclass
 from a2a.server.apps import A2AStarletteApplication
 from pydantic import BaseModel
