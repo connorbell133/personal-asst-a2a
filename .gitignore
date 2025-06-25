@@ -1,5 +1,6 @@
 .env.example
 uv.lock
+.ruff_cache/
 
 # Python-generated files
 __pycache__/
@@ -8,7 +9,7 @@ build/
 dist/
 wheels/
 *.egg-info
-
+gcp-oauth.keys.json
 # Virtual environments
 .venv
 
