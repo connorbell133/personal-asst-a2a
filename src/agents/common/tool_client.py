@@ -44,7 +44,7 @@ except ModuleNotFoundError:
     def span(*_args, **_kwargs):  # type: ignore
         """
         A no-op decorator that acts as a placeholder for span tracing when Logfire is unavailable.
-        
+
         This decorator can be applied to functions to maintain compatibility with tracing instrumentation, but it does not modify the behavior of the decorated function.
         """
 

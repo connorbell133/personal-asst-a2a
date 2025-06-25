@@ -17,7 +17,7 @@ todoist_agent = Agent(
 def review_agent_system_prompt(ctx: RunContext) -> str:
     """
     Returns the detailed system prompt that instructs the Todoist Task Management Agent on how to interpret user requests and interact exclusively with the provided MCP server tools for Todoist operations.
-    
+
     The prompt outlines principles for tool usage, parameter extraction, ambiguity resolution, natural language understanding, confirmation for destructive actions, efficiency, focus, implicit error handling, and handling of multi-step requests. It also summarizes the purpose and parameters of each available tool for the agent's reference.
     """
     return """
@@ -71,10 +71,10 @@ You are capable of handling requests that require multiple actions or tool calls
 async def run_todoist_agent(task: str) -> str:
     """
     Processes a user task request by running it through the Todoist Agent within the MCP server context.
-    
+
     Parameters:
         task (str): The user's Todoist-related request in natural language.
-    
+
     Returns:
         str: The agent's response after processing the task.
     """

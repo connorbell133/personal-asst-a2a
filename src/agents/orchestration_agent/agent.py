@@ -11,7 +11,7 @@ load_dotenv(override=True)
 def personal_assistant_system_prompt() -> str:
     """
     Return the comprehensive system prompt string for configuring the AI-powered personal assistant agent.
-    
+
     The prompt instructs the agent on how to interpret user requests, select and use specialized tools (Todoist, Calendar, Gmail), handle ambiguous queries, combine information from multiple sources when needed, and provide clear, concise responses while following best practices and operational constraints.
     """
     return """
@@ -58,10 +58,10 @@ Here's how you should operate:
 def create_orchestration_agent(tools):
     """
     Instantiate and configure a personal assistant agent with the specified tools.
-    
+
     Parameters:
         tools (list): A list of tool instances to integrate with the agent.
-    
+
     Returns:
         Agent: The configured personal assistant agent ready to handle user requests.
     """
