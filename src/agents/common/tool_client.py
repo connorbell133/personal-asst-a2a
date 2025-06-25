@@ -42,9 +42,16 @@ except ModuleNotFoundError:
     # Logfire not installed; define a no-op decorator so the rest of the code
     # still imports and works.
     def span(*_args, **_kwargs):  # type: ignore
-        """Span function."""
+        """
+        A no-op decorator that acts as a placeholder for span tracing when Logfire is unavailable.
+        
+        This decorator can be applied to functions to maintain compatibility with tracing instrumentation, but it does not modify the behavior of the decorated function.
+        """
 
         def _decorator(func):
+            """
+            A no-op decorator that returns the original function unchanged.
+            """
             return func
 
         return _decorator

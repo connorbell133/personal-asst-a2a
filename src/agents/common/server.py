@@ -85,10 +85,18 @@ async def run_uvicorn_server(create_agent_function, port):
 
 
 def run_agent_in_background(create_agent_function, port, name):
-    """Run an agent server in a background thread."""
+    """
+    Start an agent server in a separate daemon thread.
+    
+    The agent server is created using the provided factory function and runs asynchronously on the specified port. Returns the thread object managing the server.
+    """
 
     def run() -> None:
-        """Run function."""
+        """
+        Initializes a new asyncio event loop and runs the Uvicorn server coroutine for the agent application.
+        
+        This function is intended to be used as a thread target for running agent servers in the background.
+        """
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:

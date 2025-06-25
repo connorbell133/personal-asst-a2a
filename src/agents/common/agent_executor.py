@@ -38,11 +38,20 @@ class PydanticAgentExecutor(AgentExecutor):
         )
 
     async def cancel(self, task_id: str) -> None:
-        """Cancel the execution of a specific task."""
+        """
+        Cancel the execution of the task identified by the given task ID.
+        
+        Parameters:
+            task_id (str): The unique identifier of the task to cancel.
+        """
         # Implementation for cancelling tasks
 
     async def execute(self, context: RequestContext, event_queue: EventQueue) -> None:
-        """Execute function."""
+        """
+        Runs the agent asynchronously with the provided context and event queue, managing task lifecycle and status updates.
+        
+        The method retrieves user input, creates or retrieves a task, and enqueues it. It updates the task status to "working," executes the agent, captures the output, attaches it as an artifact, and marks the task as complete. If an exception occurs, the task status is set to "failed" and an error message is sent.
+        """
         query = context.get_user_input()
         task = context.current_task or new_task(context.message)
         await event_queue.enqueue_event(task)
