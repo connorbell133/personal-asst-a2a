@@ -37,22 +37,30 @@ jobs:
 
     - name: Install dependencies
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: poetry install --no-interaction --no-root
+      run: |
+        poetry install --no-interaction --no-root
+        pip install black>=23.0.0 ruff>=0.1.0 pylint>=3.0.0 pytest>=7.0.0
 
     - name: Install project
-      run: poetry install --no-interaction
+      run: |
+        poetry install --no-interaction
+        pip install black>=23.0.0 ruff>=0.1.0 pylint>=3.0.0 pytest>=7.0.0
+
+    - name: Run Black Formatter
+      run: |
+        black --check --diff .
 
     - name: Run Ruff Linter
       run: |
-        poetry run ruff check . --output-format=github
+        ruff check . --output-format=github
 
     - name: Run Ruff Formatter Check
       run: |
-        poetry run ruff format --check .
+        ruff format --check .
 
     - name: Run Pylint
       run: |
-        poetry run pylint src/ --output-format=colorized --reports=no --score=no
+        pylint src/ --output-format=colorized --reports=no --score=no
 
     - name: Run tests (if present)
       run: |

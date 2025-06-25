@@ -13,6 +13,14 @@ dependencies = [
     "pydantic-ai-slim[a2a,google,mcp,logfire]"
 ]
 
+[project.optional-dependencies]
+dev = [
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "pylint>=3.0.0",
+    "pytest>=7.0.0"
+]
+
 [tool.poetry]
 packages = [{include = "src"}]
 
