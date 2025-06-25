@@ -1,35 +1,39 @@
-# Personal Assistant A2A
+# AI Assistant A2A
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python Version](https://img.shields.io/badge/python-3.13%2B-blue)
+![Python Version](https://img.shields.io/badge/python-3.12%2B-blue)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
-> **Personal Assistant A2A** is a **privacy-first, multi-agent assistant** that connects to your Gmail, Google Calendar and Todoist accounts and answers natural-language questions such as "Do I have any overdue tasks for today?" or "What meetings do I have right after lunch tomorrow?".
+> **AI Assistant A2A** is a **privacy-first, multi-agent assistant** powered by the [A2A SDK](https://github.com/pydantic/agent2agent) that connects to your Gmail, Google Calendar, and Todoist accounts to answer natural-language questions like "Do I have any overdue tasks for today?" or "What meetings do I have right after lunch tomorrow?".
 >
-> Under the hood each capability is implemented by an *agent* that exposes its skills through an HTTP interface using the [A2A SDK](https://github.com/pydantic/agent2agent). A lightweight orchestration agent receives the user prompt, discovers the available agents at runtime and chains their tools to generate the final answer.
+> Built with **Pydantic AI** and **MCP (Model Context Protocol)**, each capability is implemented as a standalone microservice that can run locally, remotely, or in containers. A lightweight orchestration agent coordinates workflows across services to provide intelligent, context-aware responses.
 
 ---
 
 ## ✨ Key Features
 
-1. **Agent-to-Agent Architecture** – Every micro-agent (Gmail, Todoist, Calendar) is a standalone Starlette app that can run locally, remotely or inside a container.
-2. **Dynamic Orchestration** – The central *Personal Assistant* agent queries the agent registry, plans a multi-tool workflow and executes it automatically.
-3. **Bring-Your-Own-LLM** – Works with any OpenAI-compatible model (OpenAI, Anthropic, Google Vertex, OpenRouter, etc.).
-4. **100 % Local Execution** – No data leaves your machine except the calls you intentionally make to the LLM provider.
-5. **Extensible** – Write a new agent in ≤ 100 LOC, register it and it will immediately become available to every other agent.
+- **🔒 Privacy-First**: 100% local execution - no data leaves your machine except intentional LLM API calls
+- **🏗️ Microservice Architecture**: Each agent runs as an independent Starlette server with A2A integration
+- **🤖 Dynamic Orchestration**: Central orchestration agent discovers available services and chains tools automatically
+- **🧠 Multi-Model Support**: Works with any OpenAI-compatible model (OpenAI, Anthropic, Google Vertex, OpenRouter)
+- **🔌 MCP Integration**: Leverages Model Context Protocol for secure, standardized tool access
+- **📈 Observable**: Built-in Logfire integration for comprehensive monitoring and debugging
+- **🚀 Extensible**: Add new agents in ~100 lines of code with automatic discovery
 
 ---
 
 ## 📚 Table of Contents
 
-1. [Quick Start](#quick-start)
-2. [Project Layout](#project-layout)
-3. [Configuration](#configuration)
-4. [Running the Agents](#running-the-agents)
-5. [Adding a New Agent](#adding-a-new-agent)
-6. [Development](#development)
-7. [Contributing](#contributing)
-8. [License](#license)
+1. [Quick Start](#-quick-start)
+2. [Architecture](#-architecture)
+3. [Project Structure](#-project-structure)
+4. [Configuration](#-configuration)
+5. [Running the System](#-running-the-system)
+6. [Adding New Agents](#-adding-new-agents)
+7. [Development](#-development)
+8. [API Documentation](#-api-documentation)
+9. [Contributing](#-contributing)
+10. [License](#-license)
 
 ---
 
@@ -37,164 +41,422 @@
 
 ### Prerequisites
 
-* Python **3.13+** (required by `pyproject.toml`)
-* An **OpenAI-compatible** API key (e.g. `OPENAI_API_KEY`)
-* **Google OAuth 2.0** credentials that allow access to Gmail and Google Calendar *(JSON file)*
-* **Todoist** API token *(plain token)*
+- **Python 3.12+** (required by `pyproject.toml`)
+- **OpenAI-compatible API key** (OpenAI, OpenRouter, etc.)
+- **Google OAuth 2.0 credentials** for Gmail/Calendar access
+- **Todoist API token** for task management
 
 ### Installation
 
 ```bash
-# 1 – Clone and enter the project
-$ git clone https://github.com/your-org/personal-asst-a2a.git
-$ cd personal-asst-a2a
+# Clone and enter the project
+git clone https://github.com/your-org/ai-asst-a2a.git
+cd ai-asst-a2a
 
-# 2 – Create a virtual environment
-$ python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-# 3 – Install runtime dependencies
-$ pip install -e .
+# Install dependencies with Poetry
+poetry install
+
+# Or with pip
+pip install -e .
 ```
 
-Create a `.env` file at the project root (see [Configuration](#configuration)) and drop your `gcp-oauth.keys.json` in the same folder.
+### Configuration
 
-Finally start all agents:
+Create a `.env` file in the project root:
 
-```bash
-$ python app.py
-```
-
-If everything is configured correctly you will see something like:
-
-```
-✅ Agent servers are running!
-   – Gmail Agent:       http://127.0.0.1:10020
-   – Todoist Agent:     http://127.0.0.1:10022
-   – Calendar Agent:    http://127.0.0.1:10023
-   – Orchestration Agent: http://127.0.0.1:10024
-```
-
-The `app.py` bootstrap script will also send an example task to the orchestration agent:
-
-```
->>> has arda@getdelve.com sent me an email today?
-```
-
----
-
-## 🗂️ Project Layout
-
-```text
-personal-asst-a2a/
-├── app.py                      # Convenience launcher that spins up every agent
-├── src/
-│   ├── agents/                 # Individual skill agents
-│   │   ├── gmail_agent/
-│   │   ├── calendar_agent/
-│   │   ├── todoist_agent/
-│   │   └── orchestration_agent/
-│   ├── mcp_handler/            # Thin wrappers around external APIs (Gmail, Todoist, …)
-│   ├── core/                   # Shared helpers (logging, subprocess wrapper, linters)
-│   └── app.py                  # Turns a Pydantic-AI agent into an A2A server
-├── gcp-oauth.keys.json         # Google OAuth credentials (ignored by Git)
-├── pyproject.toml              # Build metadata & dependencies
-└── README.md
-```
-
----
-
-## ⚙️ Configuration
-
-All settings are **environment variables** consumed by the agents at startup. Create a `.env` file or export them in your shell:
-
-```dotenv
-# LLM provider (choose one)
+```env
+# LLM Provider (choose one)
 OPENAI_API_KEY=sk-...
 # or OPENROUTER_API_KEY=...
 
-# Google services
-# Path to the OAuth JSON that contains client_id, client_secret, refresh_token, …
-GOOGLE_OAUTH_FILE=gcp-oauth.keys.json
+# Google Services
+GOOGLE_OAUTH_CREDENTIALS=/path/to/your/gcp-oauth.keys.json
 
 # Todoist
-TODOIST_API_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TODOIST_API_TOKEN=your_todoist_token_here
 
-# Optional – server ports (default values shown)
+# Optional - Custom Ports
 PORT_GMAIL=10020
 PORT_TODOIST=10022
 PORT_CALENDAR=10023
 PORT_ORCHESTRATION=10024
 ```
 
-> **Hint **: The ports can be changed in `app.py`; remember to update the `.env` if you do.
+Place your Google OAuth credentials JSON file in the project root as `gcp-oauth.keys.json`.
+
+### Launch
+
+```bash
+python app.py
+```
+
+You'll see output like:
+
+```
+✅ Agent servers are running!
+   - Gmail Agent: http://127.0.0.1:10020
+   - Todoist Agent: http://127.0.0.1:10022
+   - Calendar Agent: http://127.0.0.1:10023
+   - Orchestration Agent: http://127.0.0.1:10024
+```
+
+The system will automatically demonstrate functionality with an example query.
 
 ---
 
-## 🏃‍♂️ Running the Agents
+## 🏗 Architecture
 
-The repository ships with a single entry-point that spins up every agent in a background thread and registers them with each other:
+The system follows a **microservice architecture** with the following components:
 
-```bash
-$ python app.py
+### Core Components
+
+- **Orchestration Agent**: Central coordinator that discovers services and chains tools
+- **Domain Agents**: Specialized agents for Gmail, Calendar, Todoist, and GitHub
+- **MCP Servers**: Secure backend services providing tool access via Model Context Protocol
+- **A2A Framework**: Service discovery and inter-agent communication layer
+
+### Agent Communication Flow
+
+```
+User Query → Orchestration Agent → Service Discovery → Tool Chaining → Response
 ```
 
-You can also run an agent on its own, e.g. only the Todoist agent:
-
-```bash
-$ uvicorn src.agents.todoist_agent.agent:app --port 8080 --reload
-```
-
-Each agent serves an **OpenAPI 3** spec at `/docs` and a [JSON schema](https://github.com/pydantic/agent2agent#schema-discovery) at `/.well-known/ai-plugin.json` for automatic discovery by other agents.
+1. User submits natural language query
+2. Orchestration agent analyzes intent
+3. Discovers available domain agents via A2A
+4. Chains appropriate tools across services
+5. Returns unified, intelligent response
 
 ---
 
-## ➕ Adding a New Agent
+## 📁 Project Structure
 
-Creating an additional skill agent (e.g. Spotify, Notion, Jira) is straightforward:
+```
+ai-asst-a2a/
+├── app.py                          # Main application launcher
+├── pyproject.toml                  # Project metadata and dependencies
+├── gcp-oauth.keys.json            # Google OAuth credentials (gitignored)
+├── logs/                          # Agent execution logs
+│   ├── calendar_agent_10023.log
+│   ├── gmail_agent_10020.log
+│   ├── orchestration_agent_10024.log
+│   └── todoist_agent_10022.log
+├── src/
+│   ├── agents/                    # Agent implementations
+│   │   ├── common/               # Shared agent utilities
+│   │   │   ├── agent.py         # Base agent configuration loader
+│   │   │   ├── agent_executor.py # Agent execution framework
+│   │   │   ├── server.py        # A2A server creation utilities
+│   │   │   └── tool_client.py   # A2A client for inter-agent communication
+│   │   ├── calendar_agent/      # Google Calendar integration
+│   │   │   ├── agent.py
+│   │   │   └── config.yml
+│   │   ├── gmail_agent/         # Gmail integration
+│   │   │   ├── agent.py
+│   │   │   └── config.yml
+│   │   ├── obsidian_agent/      # Obsidian note management
+│   │   │   ├── agent.py
+│   │   │   └── config.yml
+│   │   ├── orchestration_agent/ # Central coordination
+│   │   │   ├── agent.py
+│   │   │   └── config.yml
+│   │   ├── todoist_agent/       # Task management
+│   │   │   ├── agent.py
+│   │   │   └── config.yml
+│   │   └── tools/               # Shared tools
+│   │       └── github_tools.py  # GitHub repository operations
+│   ├── core/                    # Core utilities
+│   │   ├── llms.py             # LLM client configuration
+│   │   └── logger.py           # Logging configuration
+│   └── mcp_servers/            # Model Context Protocol servers
+│       ├── gcal.py            # Google Calendar MCP server
+│       ├── gmail.py           # Gmail MCP server
+│       └── todoist.py         # Todoist MCP server
+└── show_tree.py               # Development utility for project visualization
+```
 
-1. Create a folder `src/agents/your_agent/`.
-2. Implement a Pydantic-AI `Agent` and annotate its tools with `@agent.tool`.
-3. Expose the agent as an A2A server:
+### Key Components Explained
+
+- **`agents/common/`**: Shared infrastructure for agent creation, configuration, and server management
+- **`mcp_servers/`**: Secure backend services that provide tool access via the Model Context Protocol
+- **`core/`**: Fundamental utilities for LLM interaction and logging
+- **`config.yml` files**: YAML configuration for each agent defining models, prompts, and endpoints
+
+---
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+All configuration is handled through environment variables:
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `OPENAI_API_KEY` | OpenAI API key | Yes (or alternative) |
+| `OPENROUTER_API_KEY` | OpenRouter API key | Alternative to OpenAI |
+| `GOOGLE_OAUTH_CREDENTIALS` | Path to Google OAuth JSON | Yes |
+| `TODOIST_API_TOKEN` | Todoist API token | Yes |
+| `GITHUB_TOKEN` | GitHub API token (for GitHub tools) | Optional |
+| `PORT_*` | Custom ports for each agent | Optional |
+
+### Agent Configuration
+
+Each agent has a `config.yml` file defining:
+
+```yaml
+name: Agent Name
+description: Agent description
+model: google-gla:gemini-2.5-pro  # or openai:gpt-4, etc.
+endpoint: http://localhost:PORT
+system_prompt: |
+  Your detailed system prompt here...
+```
+
+### Google OAuth Setup
+
+1. Create a Google Cloud Project
+2. Enable Gmail and Calendar APIs
+3. Create OAuth 2.0 credentials
+4. Download the JSON file as `gcp-oauth.keys.json`
+
+---
+
+## 🏃‍♂️ Running the System
+
+### All Services
+
+Start all agents with a single command:
+
+```bash
+python app.py
+```
+
+This launches all agents in background threads and demonstrates inter-agent communication.
+
+### Individual Agents
+
+Run specific agents independently:
+
+```bash
+# Gmail agent only
+uvicorn src.agents.gmail_agent.agent:app --port 10020 --reload
+
+# Calendar agent only
+uvicorn src.agents.calendar_agent.agent:app --port 10023 --reload
+
+# Orchestration agent only
+uvicorn src.agents.orchestration_agent.agent:app --port 10024 --reload
+```
+
+### API Exploration
+
+Each agent provides:
+- **OpenAPI documentation**: `http://localhost:PORT/docs`
+- **A2A schema**: `http://localhost:PORT/.well-known/ai-plugin.json`
+- **Health check**: `http://localhost:PORT/health`
+
+---
+
+## ➕ Adding New Agents
+
+Creating a new agent is straightforward:
+
+### 1. Create Agent Structure
+
+```bash
+mkdir -p src/agents/your_agent
+touch src/agents/your_agent/__init__.py
+touch src/agents/your_agent/agent.py
+touch src/agents/your_agent/config.yml
+```
+
+### 2. Define Configuration
+
+```yaml
+# src/agents/your_agent/config.yml
+name: Your Agent
+description: Description of your agent's capabilities
+model: google-gla:gemini-2.5-flash
+endpoint: http://localhost:10025
+system_prompt: |
+  You are a specialized agent for...
+```
+
+### 3. Implement Agent
 
 ```python
+# src/agents/your_agent/agent.py
+from dotenv import load_dotenv
 from pydantic_ai import Agent
-from a2a.server.apps import A2AStarletteApplication
+from pydantic import BaseModel
+from a2a.types import AgentSkill
+from src.agents.common.agent import load_agent_config
 
-agent = Agent(model="openai:gpt-4o-mini", name="spotify_agent")
+load_dotenv(override=True)
 
-@agent.tool
-def get_recently_played(limit: int = 20):
-    ...
+config = load_agent_config("src/agents/your_agent/config.yml")
 
-app: A2AStarletteApplication = agent.to_a2a()
+class YourAgentCard(BaseModel):
+    name: str = config.name
+    description: str = config.description
+    skills: list[AgentSkill] = []
+    organization: str = config.name
+    url: str = config.endpoint
+
+your_agent = Agent(
+    model=config.model,
+    name=config.name,
+    system_prompt=config.system_prompt,
+)
+
+@your_agent.tool
+def your_tool(param: str) -> str:
+    """Tool description for the agent."""
+    # Your tool logic here
+    return f"Result for {param}"
+
+# Export A2A app
+app = your_agent.to_a2a()
 ```
 
-4. Add the server to `app.py` so it launches automatically.
+### 4. Register with Orchestrator
 
-The orchestration agent will pick it up on the next run – no other changes required!
+Add your agent to `app.py`:
+
+```python
+{
+    "name": "Your Agent",
+    "agent": create_your_agent_server,
+    "port": 10025,
+}
+```
+
+The orchestration agent will automatically discover and integrate your new agent!
 
 ---
 
 ## 🧑‍💻 Development
 
-The project follows standard Python best-practices:
+### Code Quality
 
 ```bash
-# Format and check style
-$ ruff format . && ruff check .
+# Format code
+ruff format .
 
-# Run the (placeholder) test suite
-$ pytest -q
+# Lint code
+ruff check .
+
+# Type checking
+mypy src/
+
+# Run tests
+pytest
 ```
+
+### Development Dependencies
+
+Install development tools:
+
+```bash
+poetry install --group dev
+```
+
+Includes:
+- `ruff`: Fast Python linter and formatter
+- `pylint`: Additional linting
+- `pytest`: Testing framework
+- `black`: Code formatting (backup)
+
+### Debugging
+
+The system includes comprehensive logging via Logfire:
+
+- **Console output**: Real-time agent activity
+- **Log files**: Detailed execution logs in `logs/` directory
+- **Logfire dashboard**: Web-based observability (optional)
+
+Enable detailed tracing by setting:
+
+```env
+LOGFIRE_TOKEN=your_token_here  # Optional for hosted Logfire
+```
+
+---
+
+## 📖 API Documentation
+
+### Orchestration Agent
+
+**Endpoint**: `http://localhost:10024`
+
+**Main Tool**: `create_task(url: str, task: str) -> str`
+
+Example:
+```python
+result = await a2a_client.create_task(
+    "http://localhost:10024", 
+    "Find my urgent emails from today"
+)
+```
+
+### Domain Agents
+
+Each domain agent exposes specialized tools:
+
+- **Gmail Agent** (`http://localhost:10020`): Email search, reading, composition
+- **Calendar Agent** (`http://localhost:10023`): Event retrieval, scheduling
+- **Todoist Agent** (`http://localhost:10022`): Task management, project operations
+
+Explore the full API at each agent's `/docs` endpoint.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are warmly welcomed. Please open an issue or submit a pull request. We use **conventional commits** and automated linting to keep the history clean.
+We welcome contributions! Please:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+### Contribution Guidelines
+
+- Follow the existing code style (enforced by `ruff`)
+- Add tests for new functionality
+- Update documentation as needed
+- Use conventional commit messages
+
+### Issues and Feature Requests
+
+- **Bug reports**: Use the bug report template
+- **Feature requests**: Use the feature request template
+- **Questions**: Start a discussion in the repository
 
 ---
 
 ## 📄 License
 
-`personal-asst-a2a` is released under the [MIT](LICENSE) license.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- **[Pydantic AI](https://github.com/pydantic/pydantic-ai)** for the powerful agent framework
+- **[A2A SDK](https://github.com/pydantic/agent2agent)** for seamless agent communication
+- **[Model Context Protocol](https://modelcontextprotocol.io/)** for secure tool integration
+- **[Logfire](https://logfire.pydantic.dev/)** for comprehensive observability
+
+---
+
+## 🔗 Related Projects
+
+- [Pydantic AI](https://github.com/pydantic/pydantic-ai) - Type-safe AI agent framework
+- [A2A SDK](https://github.com/pydantic/agent2agent) - Agent-to-agent communication
+- [MCP Servers](https://github.com/modelcontextprotocol/servers) - Official MCP server implementations
