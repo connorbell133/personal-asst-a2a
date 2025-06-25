@@ -6,7 +6,12 @@ from pathlib import Path
 
 
 def add_module_docstring(file_path: Path) -> bool:
-    """Add missing module docstring to a Python file."""
+    """
+    Inserts a module-level docstring into a Python file if one is missing.
+    
+    Returns:
+        bool: True if a docstring was added, False if the file already contained one.
+    """
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
@@ -51,7 +56,12 @@ def add_module_docstring(file_path: Path) -> bool:
 
 
 def fix_unused_arguments(file_path: Path) -> bool:
-    """Fix unused argument warnings by prefixing with underscore."""
+    """
+    Prefixes unused function arguments named "ctx" or "task" with an underscore in the given file to suppress pylint warnings.
+    
+    Returns:
+        bool: True if any arguments were modified, False otherwise.
+    """
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
@@ -87,7 +97,14 @@ def fix_unused_arguments(file_path: Path) -> bool:
 
 
 def add_function_docstrings(file_path: Path) -> bool:
-    """Add missing function docstrings."""
+    """
+    Insert a basic one-line docstring into each public function in the given file that lacks one.
+    
+    Reads the Python file, parses its AST, and adds a simple docstring to every function or async function whose name does not start with an underscore and which does not already have a docstring. Modifies the file in place if any changes are made.
+    
+    Returns:
+        bool: True if any docstrings were added, False otherwise.
+    """
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
@@ -134,7 +151,11 @@ def add_function_docstrings(file_path: Path) -> bool:
 
 
 def main():
-    """Main function to fix pylint issues."""
+    """
+    Recursively processes Python files in the "src" directory to add missing module and function docstrings for improved pylint compliance.
+    
+    Prints progress messages for each file processed and suggests running a formatter upon completion.
+    """
     src_path = Path("src")
 
     if not src_path.exists():

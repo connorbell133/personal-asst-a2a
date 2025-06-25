@@ -17,7 +17,19 @@ def completion(
     system_prompt: str = "",
 ) -> str:
     """
-    Generate a completion using the OpenAI API.
+    Generate a text completion using the OpenAI API via the OpenRouter endpoint.
+    
+    Parameters:
+        model (str): Identifier of the model to use for completion.
+        messages (Union[list[dict], str]): Input messages as a list of message dictionaries or a single user message string.
+        system_prompt (str, optional): An optional system prompt prepended to the messages.
+    
+    Returns:
+        str: The generated completion text from the API.
+    
+    Raises:
+        ValueError: If the model parameter is missing or the API response is invalid.
+        RuntimeError: If an error occurs during the API call or response processing.
     """
     if not model:
         raise ValueError("Model parameter is required")
