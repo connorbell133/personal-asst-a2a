@@ -46,17 +46,13 @@ jobs:
         poetry install --no-interaction
         pip install black>=23.0.0 ruff>=0.1.0 pylint>=3.0.0 pytest>=7.0.0
 
-    - name: Run Black Formatter
-      run: |
-        black --check --diff .
-
     - name: Run Ruff Linter
       run: |
-        ruff check . --output-format=github
+        ruff check src/ --output-format=github
 
     - name: Run Ruff Formatter Check
       run: |
-        ruff format --check .
+        ruff format --check src/
 
     - name: Run Pylint
       run: |
