@@ -28,13 +28,13 @@ class OrchestrationAgentCard(BaseModel):
 
 def create_orchestration_agent(tools) -> Agent:
     """
-    Instantiate and configure a personal assistant agent with the specified tools.
+    Creates and returns a personal assistant agent configured with the provided tools and settings from the orchestration agent configuration.
 
     Parameters:
-        tools (list): A list of tool instances to integrate with the agent.
+        tools (list): Tool instances to be integrated into the agent.
 
     Returns:
-        Agent: The configured personal assistant agent ready to handle user requests.
+        Agent: A configured agent instance ready to process user requests.
     """
     agent = Agent(
         model=orchestration_agent_config.model,
