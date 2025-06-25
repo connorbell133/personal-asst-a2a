@@ -1,5 +1,6 @@
 .env.example
 uv.lock
+.ruff_cache/
 
 # Python-generated files
 __pycache__/
