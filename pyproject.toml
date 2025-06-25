@@ -31,5 +31,6 @@ build-backend = "poetry.core.masonry.api"
 [tool.pylint.messages_control]
 disable = [
     "import-error",
-    "unused-argument"
+    "unused-argument",
+    "too-few-public-methods"
 ]
