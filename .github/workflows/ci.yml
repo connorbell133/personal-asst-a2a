@@ -60,7 +60,7 @@ jobs:
 
     - name: Run Pylint
       run: |
-        pylint src/ --output-format=colorized --reports=no --score=no
+        pylint src/ --output-format=colorized --reports=no --score=no --rcfile=pyproject.toml
 
     - name: Run tests (if present)
       run: |
