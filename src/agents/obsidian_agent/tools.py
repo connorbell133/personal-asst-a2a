@@ -11,8 +11,15 @@ BASE_URL = "https://api.github.com/repos"
 
 def get_github_folder_contents(owner: str, repo: str, path: str = "") -> dict:
     """
-    Fetches the contents of a given folder in a GitHub repository.
-    Recursively fetches contents of subfolders to build a complete tree.
+    Recursively retrieves the contents of a folder in a GitHub repository as a nested dictionary.
+
+    Parameters:
+        owner (str): The GitHub username or organization name.
+        repo (str): The name of the repository.
+        path (str, optional): The folder path within the repository. Defaults to the root directory.
+
+    Returns:
+        dict: A nested dictionary representing the folder structure, where subfolders are nested dictionaries and files are marked with the string "file". Returns None if the request fails.
     """
     url = f"{BASE_URL}/{owner}/{repo}/contents/{path}"
     headers = {
@@ -44,7 +51,9 @@ def get_github_folder_contents(owner: str, repo: str, path: str = "") -> dict:
 
 def get_github_file_contents(owner: str, repo: str, path: str) -> dict:
     """
-    Fetches the contents of a given file in a GitHub repository.
+    Retrieve the contents of a markdown file from a GitHub repository.
+
+    Returns a dictionary with the decoded file contents if the file is a markdown file; otherwise, returns an error dictionary.
     """
 
     # check if the file is a markdown file
@@ -94,7 +103,16 @@ def print_folder_tree(tree, indent=0, prefix="", is_last_item=True):
 def send_new_content_to_github(
     note_path: str, content: str, owner: str, repo: str
 ) -> dict:
-    """Send the new content to github."""
+    """
+    Create or update a file in a GitHub repository with the specified content.
+
+    Parameters:
+        note_path (str): The path to the file in the repository.
+        content (str): The new content to write to the file.
+
+    Returns:
+        dict: The JSON response from the GitHub API after the file operation.
+    """
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{note_path}"
     headers = {
         "Accept": "application/vnd.github+json",
@@ -111,7 +129,17 @@ def send_new_content_to_github(
 
 
 def delete_note_from_github(note_path: str, owner: str, repo: str) -> dict:
-    """Delete the given note from github."""
+    """
+    Deletes a file at the specified path from a GitHub repository.
+
+    Parameters:
+        note_path (str): The path to the file to delete within the repository.
+        owner (str): The GitHub username or organization that owns the repository.
+        repo (str): The name of the GitHub repository.
+
+    Returns:
+        dict: The JSON response from the GitHub API after attempting to delete the file.
+    """
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{note_path}"
     headers = {
         "Accept": "application/vnd.github+json",

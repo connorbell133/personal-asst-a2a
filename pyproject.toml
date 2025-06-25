@@ -32,5 +32,6 @@ build-backend = "poetry.core.masonry.api"
 disable = [
     "import-error",
     "unused-argument",
-    "too-few-public-methods"
+    "too-few-public-methods",
+    "line-too-long",
 ]

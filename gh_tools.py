@@ -8,8 +8,15 @@ BASE_URL = "https://api.github.com/repos"
 
 def get_github_folder_contents(owner: str, repo: str, path: str = "") -> dict:
     """
-    Fetches the contents of a given folder in a GitHub repository.
-    Recursively fetches contents of subfolders to build a complete tree.
+    Recursively retrieves the folder structure of a specified path in a GitHub repository.
+    
+    Parameters:
+        owner (str): The GitHub username or organization that owns the repository.
+        repo (str): The name of the GitHub repository.
+        path (str, optional): The folder path within the repository to start from. Defaults to the root directory.
+    
+    Returns:
+        dict: A nested dictionary representing the folder and file structure, where directories are nested dictionaries and files are represented by the string "file". Returns None if the request fails.
     """
     url = f"{BASE_URL}/{owner}/{repo}/contents/{path}"
     headers = {
@@ -42,7 +49,15 @@ def get_github_folder_contents(owner: str, repo: str, path: str = "") -> dict:
 def print_folder_tree(
     tree: dict, indent: int = 0, prefix: str = "", is_last: bool = True
 ):
-    """Prints the folder tree in an organized format using tree-style syntax."""
+    """
+    Display a nested folder structure as a tree diagram in the console.
+    
+    Parameters:
+        tree (dict): A nested dictionary representing folders and files, where files are marked with the string "file".
+        indent (int, optional): Current indentation level for recursive calls. Defaults to 0.
+        prefix (str, optional): String prefix used to format tree branches. Defaults to an empty string.
+        is_last (bool, optional): Indicates if the current item is the last in its directory. Defaults to True.
+    """
     items = list(tree.items())
     for i, (name, content) in enumerate(items):
         is_last_item = i == len(items) - 1
