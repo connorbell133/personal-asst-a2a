@@ -10,8 +10,9 @@ load_dotenv(override=True)
 
 def personal_assistant_system_prompt() -> str:
     """
-    Returns the comprehensive system prompt for the AI-powered GitHub Pull Request review agent.
+    Return the comprehensive system prompt string for configuring the AI-powered personal assistant agent.
 
+    The prompt instructs the agent on how to interpret user requests, select and use specialized tools (Todoist, Calendar, Gmail), handle ambiguous queries, combine information from multiple sources when needed, and provide clear, concise responses while following best practices and operational constraints.
     """
     return """
 You are an AI-powered personal assistant designed to help with a wide range of tasks by leveraging specialized tools. Your primary goal is to understand the user's request, determine the most appropriate tool(s) to use (Todoist, Calendar, Gmail), execute the necessary actions, and provide a clear, concise, and helpful response.
@@ -56,7 +57,13 @@ Here's how you should operate:
 
 def create_orchestration_agent(tools):
     """
-    Create an orchestration agent.
+    Instantiate and configure a personal assistant agent with the specified tools.
+
+    Parameters:
+        tools (list): A list of tool instances to integrate with the agent.
+
+    Returns:
+        Agent: The configured personal assistant agent ready to handle user requests.
     """
     agent = Agent(
         model="google-gla:gemini-2.5-pro",
