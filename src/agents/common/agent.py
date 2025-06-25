@@ -2,8 +2,34 @@
 
 import asyncio
 import threading
-
+import yaml
+from pydantic import BaseModel, ValidationError
 from src.agents.common.server import run_uvicorn_server
+
+
+class BaseAgentConfig(BaseModel):
+    """
+    Base agent config.
+    """
+
+    name: str
+    description: str
+    model: str
+    endpoint: str
+    system_prompt: str
+
+
+def load_agent_config(config_path: str) -> BaseAgentConfig:
+    """
+    Create an agent from a config file.
+    """
+    agent_config = None
+    with open(config_path, "r", encoding="utf-8") as f:
+        agent_config = yaml.safe_load(f)
+    try:
+        return BaseAgentConfig(**agent_config)
+    except ValidationError as e:
+        raise ValueError(f"Error loading agent config: {e}") from e
 
 
 def run_agent_in_background(create_agent_function, port, name):

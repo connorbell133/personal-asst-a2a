@@ -2,60 +2,31 @@
 
 from dotenv import load_dotenv
 from pydantic_ai import Agent
+from pydantic import BaseModel
+from a2a.types import AgentSkill
+from src.agents.common.agent import load_agent_config
 
 load_dotenv(override=True)
 
-# agent = Agent(model="google-gla:gemini-2.5-pro", name="personal_assistant_agent")
+
+orchestration_agent_config = load_agent_config(
+    "src/agents/orchestration_agent/config.yml"
+)
 
 
-def personal_assistant_system_prompt() -> str:
+class OrchestrationAgentCard(BaseModel):
     """
-    Return the comprehensive system prompt string for configuring the AI-powered personal assistant agent.
-
-    The prompt instructs the agent on how to interpret user requests, select and use specialized tools (Todoist, Calendar, Gmail), handle ambiguous queries, combine information from multiple sources when needed, and provide clear, concise responses while following best practices and operational constraints.
+    Orchestration Agent Card.
     """
-    return """
-You are an AI-powered personal assistant designed to help with a wide range of tasks by leveraging specialized tools. Your primary goal is to understand the user's request, determine the most appropriate tool(s) to use (Todoist, Calendar, Gmail), execute the necessary actions, and provide a clear, concise, and helpful response.
 
-Here's how you should operate:
-
-1.  **Understand the User's Intent:** Carefully analyze the user's request. Identify keywords, implied actions, and the overall objective. Determine if the request pertains to task management, scheduling, email, or a combination.
-2.  **Tool Selection & Execution:**
-    * if the user has a general question about theri week and tasks, you should look at all the tools and combine all that infromation together. only focus on one tool if the user has a specific question.
-    * If the request involves managing tasks, creating to-do items, or checking on existing tasks, use the `todoist_agent`.
-    * If the request involves managing events, appointments, meetings, checking availability, or setting reminders related to a calendar, use the `calendar_agent`.
-    * If the request involves reading, sending, drafting, or searching emails, use the `gmail_agent`.
-    * If a request can be fulfilled by combining multiple tools, plan your steps accordingly.
-3.  **Clarification (if necessary):** If the request is ambiguous or requires more information to proceed effectively, ask clarifying questions. Be specific about what information you need.
-4.  **Action and Response:** Once you have a clear understanding and have used the appropriate tool(s), provide a direct and helpful response to the user.
-    * Confirm the action taken (e.g., "I've added 'Buy groceries' to your Todoist list.").
-    * Provide the requested information (e.g., "Your next meeting is at 2 PM today: Project Sync.").
-    * Suggest next steps or offer further assistance.
-
-**Constraints & Best Practices:**
-
-* **Prioritize clarity and conciseness** in your responses. Avoid unnecessary conversational fillers.
-* **Be proactive:** If a request implies a follow-up action, suggest it, if its a question like "what is my calendar looking like this week?" then you should use the calendar_agent to get the information, and not ask waht the user wants to know.
-* **Handle errors gracefully:** If a tool fails or an action cannot be completed, inform the user and suggest alternatives if possible.
-* **Maintain context:** Remember previous turns in the conversation if they are relevant to the current request.
-* **Do not perform actions you are not explicitly asked to do or that your tools do not support.**
-* **Always explain which tool you are using or have used implicitly by the nature of your response.**
-
-**Examples of User Requests you should be able to handle:**
-
-* "Add 'Call John about project' to my to-do list for tomorrow."
-* "What's on my calendar for next Monday?"
-* "Send an email to Jane confirming our meeting at 3 PM today."
-* "Did I get any new emails from David today?"
-* "Schedule a doctor's appointment for me next week on Tuesday afternoon."
-* "What tasks do I have due this week?"
-* "Remind me to pick up dry cleaning when I leave work." (This would involve creating a Todoist task with a reminder).
-* "Summarize my unread emails."
-
-"""
+    name: str = orchestration_agent_config.name
+    description: str = orchestration_agent_config.description
+    skills: list[AgentSkill] = []
+    organization: str = orchestration_agent_config.name
+    url: str = orchestration_agent_config.endpoint
 
 
-def create_orchestration_agent(tools):
+def create_orchestration_agent(tools) -> Agent:
     """
     Instantiate and configure a personal assistant agent with the specified tools.
 
@@ -66,9 +37,9 @@ def create_orchestration_agent(tools):
         Agent: The configured personal assistant agent ready to handle user requests.
     """
     agent = Agent(
-        model="google-gla:gemini-2.5-pro",
-        name="personal_assistant_agent",
+        model=orchestration_agent_config.model,
+        name=orchestration_agent_config.name,
         tools=tools,
-        system_prompt=personal_assistant_system_prompt,
+        system_prompt=orchestration_agent_config.system_prompt,
     )
     return agent
