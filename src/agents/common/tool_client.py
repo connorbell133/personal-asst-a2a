@@ -5,6 +5,49 @@ from typing import Any
 import httpx
 import requests
 
+# ---------- Logfire instrumentation ----------
+# Try to import Logfire if available. We wrap this in a try/except so that the
+# rest of the library still works when Logfire is not installed or an older
+# version is present (e.g. during CI or minimal deployments).
+
+try:
+    import logfire
+
+    if hasattr(logfire, "configure"):
+        # We only need to call configure once per process. If the user has
+        # already configured Logfire (e.g. in ``app.py``) this call will be a
+        # no-op. We still add it here so that the module can be imported and
+        # used stand-alone in other scripts without additional setup.
+        logfire.configure(send_to_logfire=False)
+
+        # Instrument common libraries used by the tool client so that HTTP
+        # traffic appears automatically in Logfire's Live view.
+        for _instr in (
+            getattr(logfire, "instrument_httpx", None),
+            getattr(logfire, "instrument_requests", None),
+        ):
+            if callable(_instr):
+                try:
+                    _instr()
+                except Exception:
+                    # Instrumentation failure shouldn't crash the app.
+                    pass
+
+    # Expose decorator helper only if Logfire import succeeded
+    span = getattr(logfire, "instrument", lambda *a, **k: (lambda f: f))
+
+except ModuleNotFoundError:
+    # Logfire not installed; define a no-op decorator so the rest of the code
+    # still imports and works.
+    def span(*_args, **_kwargs):  # type: ignore
+        def _decorator(func):
+            return func
+
+        return _decorator
+
+
+# -------------------------------------------------------------
+
 from a2a.client import A2AClient
 from a2a.types import AgentCard, MessageSendParams, SendMessageRequest
 
@@ -25,6 +68,9 @@ class A2AToolClient:
             url = f"http://{url}"
         return url.rstrip("/")
 
+    # -------------------- Public API --------------------
+
+    @span("A2AToolClient.add_remote_agent", extract_args=True)
     def add_remote_agent(self, agent_url: str):
         """Add agent to the list of available remote agents."""
         normalized_url = self._normalize_url(agent_url)
@@ -32,6 +78,7 @@ class A2AToolClient:
             # Initialize with None to indicate metadata not yet fetched
             self._agent_info_cache[normalized_url] = None
 
+    @span("A2AToolClient.list_remote_agents")
     def list_remote_agents(self) -> list[dict[str, Any]]:
         """List available remote agents with caching."""
         if not self._agent_info_cache:
@@ -56,6 +103,7 @@ class A2AToolClient:
 
         return self._agent_info_cache
 
+    @span("A2AToolClient.create_task", extract_args=True)
     async def create_task(self, agent_url: str, message: str) -> str:
         """Send a message following the official A2A SDK pattern."""
         # Normalise the agent URL first so that downstream libraries always

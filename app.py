@@ -1,6 +1,28 @@
 import time
 
 import asyncio
+import logfire
+import logfire
+
+# ---------------------------------------------------------------------------
+# Configure Logfire for comprehensive observability. This will print a link
+# to the local Logfire Live view and automatically display logs in the
+# console. You can set LOGFIRE_TOKEN or other env vars to forward traces to
+# the hosted Logfire backend if desired.
+# ---------------------------------------------------------------------------
+
+# Capture Pydantic-AI and HTTPX calls which power the agent runtime.
+try:
+    logfire.instrument_pydantic_ai()
+except AttributeError:
+    # Older versions of Logfire may not have this helper; skip gracefully.
+    pass
+
+try:
+    logfire.instrument_httpx()
+except AttributeError:
+    pass
+
 from typing import Callable, Dict
 from src.agents.gmail_agent import gmail_agent, GmailAgentCard
 from src.agents.todoist_agent import todoist_agent, TodoistAgentCard
