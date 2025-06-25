@@ -12,12 +12,12 @@ BASE_URL = "https://api.github.com/repos"
 def get_github_folder_contents(owner: str, repo: str, path: str = "") -> dict:
     """
     Recursively retrieves the contents of a folder in a GitHub repository as a nested dictionary.
-    
+
     Parameters:
         owner (str): The GitHub username or organization name.
         repo (str): The name of the repository.
         path (str, optional): The folder path within the repository. Defaults to the root directory.
-    
+
     Returns:
         dict: A nested dictionary representing the folder structure, where subfolders are nested dictionaries and files are marked with the string "file". Returns None if the request fails.
     """
@@ -52,7 +52,7 @@ def get_github_folder_contents(owner: str, repo: str, path: str = "") -> dict:
 def get_github_file_contents(owner: str, repo: str, path: str) -> dict:
     """
     Retrieve the contents of a markdown file from a GitHub repository.
-    
+
     Returns a dictionary with the decoded file contents if the file is a markdown file; otherwise, returns an error dictionary.
     """
 
@@ -105,11 +105,11 @@ def send_new_content_to_github(
 ) -> dict:
     """
     Create or update a file in a GitHub repository with the specified content.
-    
+
     Parameters:
         note_path (str): The path to the file in the repository.
         content (str): The new content to write to the file.
-    
+
     Returns:
         dict: The JSON response from the GitHub API after the file operation.
     """
@@ -131,12 +131,12 @@ def send_new_content_to_github(
 def delete_note_from_github(note_path: str, owner: str, repo: str) -> dict:
     """
     Deletes a file at the specified path from a GitHub repository.
-    
+
     Parameters:
         note_path (str): The path to the file to delete within the repository.
         owner (str): The GitHub username or organization that owns the repository.
         repo (str): The name of the GitHub repository.
-    
+
     Returns:
         dict: The JSON response from the GitHub API after attempting to delete the file.
     """
