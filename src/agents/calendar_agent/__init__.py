@@ -1,6 +1,5 @@
 """Calendar Agent module module."""
 
-from .agent import calendar_agent
-from .agent_card import CalendarAgentCard
+from .agent import calendar_agent, CalendarAgentCard
 
 __all__ = ["calendar_agent", "CalendarAgentCard"]

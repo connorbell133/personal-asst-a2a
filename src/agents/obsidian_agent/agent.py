@@ -3,9 +3,9 @@
 import logfire
 from dotenv import load_dotenv
 from pydantic_ai import Agent, RunContext
-
-from src.mcp_handler.mcp_gmail import server as obsidian_server
-
+from pydantic import BaseModel
+from a2a.types import AgentSkill
+from src.agents.common.agent import load_agent_config
 from .tools import (
     delete_note_from_github,
     get_github_file_contents,
@@ -16,23 +16,27 @@ from .tools import (
 
 load_dotenv(override=True)
 
+obsidian_agent_config = load_agent_config("src/agents/obsidian_agent/config.yml")
+
+
+class ObsidianAgentCard(BaseModel):
+    """
+    This agent is used to manage the Obsidian vault.
+    """
+
+    name: str = obsidian_agent_config.name
+    description: str = obsidian_agent_config.description
+    skills: list[AgentSkill] = []
+    organization: str = obsidian_agent_config.name
+    url: str = obsidian_agent_config.endpoint
+
+
 obsidian_agent = Agent(
-    model="google-gla:gemini-2.5-flash",
-    mcp_servers=[obsidian_server],
-    name="obsidian_agent",
+    model=obsidian_agent_config.model,
+    mcp_servers=[],
+    name=obsidian_agent_config.name,
+    system_prompt=obsidian_agent_config.system_prompt,
 )
-
-
-@obsidian_agent.system_prompt
-def review_agent_system_prompt(ctx: RunContext) -> str:
-    """
-    Return the system prompt string for the AI agent.
-
-    Currently returns an empty multi-line string.
-    """
-    return """
-
-"""
 
 
 async def run_obsidian_agent(task: str) -> str:
