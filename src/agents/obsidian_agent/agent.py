@@ -6,7 +6,7 @@ from pydantic_ai import Agent, RunContext
 from pydantic import BaseModel
 from a2a.types import AgentSkill
 from src.agents.common.agent import load_agent_config
-from .tools import (
+from src.agents.tools.github_tools import (
     delete_note_from_github,
     get_github_file_contents,
     get_github_folder_contents,
