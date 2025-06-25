@@ -1,17 +1,22 @@
 import asyncio
 import time
 import logfire
-from src.agents.common.agent import run_agent_in_background
-from src.agents.common.agent_manager import agent_manager
-from src.agents.calendar_agent import CalendarAgentCard, calendar_agent
-from src.agents.gmail_agent import GmailAgentCard, gmail_agent
-from src.agents.obsidian_agent import ObsidianAgentCard, obsidian_agent
-from src.agents.orchestration_agent import (
+
+from src.agents import (
+    run_agent_in_background,
+    agent_manager,
+    CalendarAgentCard,
+    calendar_agent,
+    GmailAgentCard,
+    gmail_agent,
+    ObsidianAgentCard,
+    obsidian_agent,
     OrchestrationAgentCard,
     orchestration_agent,
     a2a_client,
+    TodoistAgentCard,
+    todoist_agent,
 )
-from src.agents.todoist_agent import TodoistAgentCard, todoist_agent
 
 
 try:
