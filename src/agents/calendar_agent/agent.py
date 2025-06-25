@@ -2,7 +2,6 @@
 
 from dotenv import load_dotenv
 from pydantic_ai import Agent
-from pydantic import BaseModel
 from a2a.types import AgentSkill
 
 from src.mcp_servers import gcal_server
@@ -13,7 +12,7 @@ load_dotenv(override=True)
 calendar_agent_config = load_agent_config("src/agents/calendar_agent/config.yml")
 
 
-class CalendarAgentCard(BaseModel):
+class CalendarAgentCard:
     """
     Calendar Agent Card.
     """
@@ -22,7 +21,8 @@ class CalendarAgentCard(BaseModel):
     description: str = calendar_agent_config.description
     skills: list[AgentSkill] = []
     organization: str = calendar_agent_config.name
-    url: str = calendar_agent_config.endpoint
+    port: int = calendar_agent_config.port
+    host: str = calendar_agent_config.host
 
 
 calendar_agent = Agent(

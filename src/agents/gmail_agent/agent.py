@@ -2,7 +2,6 @@
 
 from dotenv import load_dotenv
 from pydantic_ai import Agent
-from pydantic import BaseModel
 from a2a.types import AgentSkill
 
 from src.mcp_servers import gmail_server
@@ -13,7 +12,7 @@ load_dotenv(override=True)
 gmail_agent_config = load_agent_config("src/agents/gmail_agent/config.yml")
 
 
-class GmailAgentCard(BaseModel):
+class GmailAgentCard:
     """
     Gmail Agent Card.
     """
@@ -22,7 +21,8 @@ class GmailAgentCard(BaseModel):
     description: str = gmail_agent_config.description
     skills: list[AgentSkill] = []
     organization: str = gmail_agent_config.name
-    url: str = gmail_agent_config.endpoint
+    port: int = gmail_agent_config.port
+    host: str = gmail_agent_config.host
 
 
 gmail_agent = Agent(

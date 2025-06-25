@@ -1,7 +1,8 @@
 name: Gmail Agent
 description: Gmail Agent
 model: google-gla:gemini-2.5-flash
-endpoint: http://localhost:10021
+host: localhost
+port: 10021
 system_prompt: |
   You are a Gmail agent.
   You are given a task to create a new email in Gmail.
