@@ -1,3 +1,5 @@
+"""Tool Client module."""
+
 import json
 import uuid
 from typing import Any
@@ -40,6 +42,8 @@ except ModuleNotFoundError:
     # Logfire not installed; define a no-op decorator so the rest of the code
     # still imports and works.
     def span(*_args, **_kwargs):  # type: ignore
+        """Span function."""
+
         def _decorator(func):
             return func
 

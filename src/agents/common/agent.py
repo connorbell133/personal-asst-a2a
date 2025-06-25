@@ -1,3 +1,5 @@
+"""Agent module."""
+
 import asyncio
 import threading
 
@@ -8,6 +10,7 @@ def run_agent_in_background(create_agent_function, port, name):
     """Run an agent server in a background thread."""
 
     def run() -> None:
+        """Run function."""
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:

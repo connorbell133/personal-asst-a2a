@@ -1,12 +1,15 @@
-import os
-import requests
+"""Tools module."""
+
 import base64
+import os
+
+import requests
 
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")  # Get token from environment variable
 BASE_URL = "https://api.github.com/repos"
 
 
-def get_github_folder_contents(owner, repo, path=""):
+def get_github_folder_contents(owner: str, repo: str, path: str = "") -> dict:
     """
     Fetches the contents of a given folder in a GitHub repository.
     Recursively fetches contents of subfolders to build a complete tree.
@@ -18,7 +21,7 @@ def get_github_folder_contents(owner, repo, path=""):
     }
 
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()  # Raise an HTTPError for bad responses (4xx or 5xx)
         contents = response.json()
     except requests.exceptions.RequestException as e:
@@ -29,7 +32,6 @@ def get_github_folder_contents(owner, repo, path=""):
     for item in contents:
         name = item["name"]
         item_type = item["type"]
-        html_url = item["html_url"]  # Useful for direct links
 
         if item_type == "dir":
             # Recursively get contents of subdirectories
@@ -40,7 +42,7 @@ def get_github_folder_contents(owner, repo, path=""):
     return folder_tree
 
 
-def get_github_file_contents(owner, repo, path):
+def get_github_file_contents(owner: str, repo: str, path: str) -> dict:
     """
     Fetches the contents of a given file in a GitHub repository.
     """
@@ -58,7 +60,7 @@ def get_github_file_contents(owner, repo, path):
         "Accept": "application/vnd.github.v3+json",
         "Authorization": f"Bearer {GITHUB_TOKEN}",
     }
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=10)
     response.raise_for_status()
 
     # load contents from  the content base64 encoded
@@ -104,7 +106,7 @@ def send_new_content_to_github(
         "committer": {"name": "Monalisa Octocat", "email": "octocat@github.com"},
         "content": base64.b64encode(content.encode()).decode(),
     }
-    response = requests.put(url, headers=headers, json=data)
+    response = requests.put(url, headers=headers, json=data, timeout=10)
     return response.json()
 
 
@@ -115,5 +117,5 @@ def delete_note_from_github(note_path: str, owner: str, repo: str) -> dict:
         "Accept": "application/vnd.github+json",
         "Authorization": f"Bearer {GITHUB_TOKEN}",
     }
-    response = requests.delete(url, headers=headers)
+    response = requests.delete(url, headers=headers, timeout=10)
     return response.json()

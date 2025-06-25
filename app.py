@@ -1,7 +1,6 @@
+import asyncio
 import time
 
-import asyncio
-import logfire
 import logfire
 
 # ---------------------------------------------------------------------------
@@ -24,18 +23,20 @@ except AttributeError:
     pass
 
 from typing import Callable, Dict
-from src.agents.gmail_agent import gmail_agent, GmailAgentCard
-from src.agents.todoist_agent import todoist_agent, TodoistAgentCard
-from src.agents.calendar_agent import calendar_agent, CalendarAgentCard
-from src.agents.orchestration_agent import (
-    personal_assistant_system_prompt,
-    OrchestrationAgentCard,
-)
-from src.agents.common.tool_client import A2AToolClient
-from src.agents.common.agent import run_agent_in_background
-from src.agents.common.server import create_agent_a2a_server
+
 from a2a.server.apps import A2AStarletteApplication
 from pydantic_ai import Agent
+
+from src.agents.calendar_agent import CalendarAgentCard, calendar_agent
+from src.agents.common.agent import run_agent_in_background
+from src.agents.common.server import create_agent_a2a_server
+from src.agents.common.tool_client import A2AToolClient
+from src.agents.gmail_agent import GmailAgentCard, gmail_agent
+from src.agents.orchestration_agent import (
+    OrchestrationAgentCard,
+    personal_assistant_system_prompt,
+)
+from src.agents.todoist_agent import TodoistAgentCard, todoist_agent
 
 a2a_client = A2AToolClient()
 

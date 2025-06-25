@@ -1,7 +1,14 @@
+"""Orchestration Agent Card."""
+
+from pydantic import BaseModel
 from a2a.types import AgentSkill
 
 
-class OrchestrationAgentCard:
+class OrchestrationAgentCard(BaseModel):
+    """
+    Orchestration Agent Card.
+    """
+
     name: str = "Orchestration Agent"
     description: str = "Orchestration Agent"
     skills: list[AgentSkill] = []
