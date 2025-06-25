@@ -1,8 +1,13 @@
 """Orchestration Agent module module."""
 
-from .agent import create_orchestration_agent, OrchestrationAgentCard
+from .agent import (
+    OrchestrationAgentCard,
+    orchestration_agent,
+    a2a_client,
+)
 
 __all__ = [
-    "create_orchestration_agent",
     "OrchestrationAgentCard",
+    "orchestration_agent",
+    "a2a_client",
 ]

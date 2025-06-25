@@ -2,11 +2,13 @@
 
 from dotenv import load_dotenv
 from pydantic_ai import Agent
-from pydantic import BaseModel
 from a2a.types import AgentSkill
 from src.agents.common.agent import load_agent_config
+from src.agents.common.tool_client import A2AToolClient
 
 load_dotenv(override=True)
+
+a2a_client = A2AToolClient()
 
 
 orchestration_agent_config = load_agent_config(
@@ -14,7 +16,7 @@ orchestration_agent_config = load_agent_config(
 )
 
 
-class OrchestrationAgentCard(BaseModel):
+class OrchestrationAgentCard:
     """
     Orchestration Agent Card.
     """
@@ -23,23 +25,13 @@ class OrchestrationAgentCard(BaseModel):
     description: str = orchestration_agent_config.description
     skills: list[AgentSkill] = []
     organization: str = orchestration_agent_config.name
-    url: str = orchestration_agent_config.endpoint
+    port: int = orchestration_agent_config.port
+    host: str = orchestration_agent_config.host
 
 
-def create_orchestration_agent(tools) -> Agent:
-    """
-    Creates and returns a personal assistant agent configured with the provided tools and settings from the orchestration agent configuration.
-
-    Parameters:
-        tools (list): Tool instances to be integrated into the agent.
-
-    Returns:
-        Agent: A configured agent instance ready to process user requests.
-    """
-    agent = Agent(
-        model=orchestration_agent_config.model,
-        name=orchestration_agent_config.name,
-        tools=tools,
-        system_prompt=orchestration_agent_config.system_prompt,
-    )
-    return agent
+orchestration_agent = Agent(
+    model="google-gla:gemini-2.5-pro",
+    name="personal_assistant_agent",
+    tools=[a2a_client.list_remote_agents, a2a_client.create_task],
+    system_prompt=orchestration_agent_config.system_prompt,
+)

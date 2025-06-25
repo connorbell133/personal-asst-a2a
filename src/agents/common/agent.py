@@ -15,8 +15,9 @@ class BaseAgentConfig(BaseModel):
     name: str
     description: str
     model: str
-    endpoint: str
     system_prompt: str
+    port: int
+    host: str = "localhost"
 
 
 def load_agent_config(config_path: str) -> BaseAgentConfig:

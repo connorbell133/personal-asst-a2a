@@ -73,7 +73,7 @@ async def run_uvicorn_server(create_agent_function, port):
     """Run server with proper error handling."""
     try:
         print(f"🚀 Starting agent on port {port}...")
-        app = create_agent_function(port=port)
+        app = create_agent_function()
         config = uvicorn.Config(
             app.build(), host="127.0.0.1", port=port, log_level="error", loop="asyncio"
         )

@@ -1,7 +1,18 @@
 import asyncio
 import time
-
 import logfire
+from typing import Callable, Dict
+from a2a.server.apps import A2AStarletteApplication
+from src.agents.common.agent import run_agent_in_background
+from src.agents.common.server import create_agent_a2a_server
+from src.agents.calendar_agent import CalendarAgentCard, calendar_agent
+from src.agents.gmail_agent import GmailAgentCard, gmail_agent
+from src.agents.orchestration_agent import (
+    OrchestrationAgentCard,
+    orchestration_agent,
+    a2a_client,
+)
+from src.agents.todoist_agent import TodoistAgentCard, todoist_agent
 
 # ---------------------------------------------------------------------------
 # Configure Logfire for comprehensive observability. This will print a link
@@ -22,117 +33,86 @@ try:
 except AttributeError:
     pass
 
-from typing import Callable, Dict
 
-from a2a.server.apps import A2AStarletteApplication
-from pydantic_ai import Agent
-
-from src.agents.calendar_agent import CalendarAgentCard, calendar_agent
-from src.agents.common.agent import run_agent_in_background
-from src.agents.common.server import create_agent_a2a_server
-from src.agents.common.tool_client import A2AToolClient
-from src.agents.gmail_agent import GmailAgentCard, gmail_agent
-from src.agents.orchestration_agent import (
-    OrchestrationAgentCard,
-    personal_assistant_system_prompt,
-)
-from src.agents.todoist_agent import TodoistAgentCard, todoist_agent
-
-a2a_client = A2AToolClient()
-
-
-def create_gmail_agent_server(host="localhost", port=10020) -> A2AStarletteApplication:
+def create_gmail_agent_server() -> A2AStarletteApplication:
     """Create A2A server for Gmail Agent using the unified wrapper."""
     return create_agent_a2a_server(
         agent=gmail_agent,
         name=GmailAgentCard.name,
         description=GmailAgentCard.description,
         skills=GmailAgentCard.skills,
-        host=host,
-        port=port,
+        host=GmailAgentCard.host,
+        port=GmailAgentCard.port,
         status_message="Searching for Gmail messages...",
         artifact_name="response",
     )
 
 
-def create_todoist_agent_server(
-    host="localhost", port=10021
-) -> A2AStarletteApplication:
+def create_todoist_agent_server() -> A2AStarletteApplication:
     """Create A2A server for Todoist Agent using the unified wrapper."""
     return create_agent_a2a_server(
         agent=todoist_agent,
         name=TodoistAgentCard.name,
         description=TodoistAgentCard.description,
         skills=TodoistAgentCard.skills,
-        host=host,
-        port=port,
+        host=TodoistAgentCard.host,
+        port=TodoistAgentCard.port,
         status_message="Searching for Todoist tasks...",
         artifact_name="response",
     )
 
 
-def create_calendar_agent_server(
-    host="localhost", port=10021
-) -> A2AStarletteApplication:
+def create_calendar_agent_server() -> A2AStarletteApplication:
     """Create A2A server for Calendar Agent using the unified wrapper."""
     return create_agent_a2a_server(
         agent=calendar_agent,
         name=CalendarAgentCard.name,
         description=CalendarAgentCard.description,
         skills=CalendarAgentCard.skills,
-        host=host,
-        port=port,
+        host=CalendarAgentCard.host,
+        port=CalendarAgentCard.port,
         status_message="Searching for Calendar events...",
         artifact_name="response",
     )
 
 
-orchestration_agent = Agent(
-    model="google-gla:gemini-2.5-pro",
-    name="personal_assistant_agent",
-    tools=[a2a_client.list_remote_agents, a2a_client.create_task],
-    system_prompt=personal_assistant_system_prompt(),
-)
-
-
-def create_orchestration_agent_server(
-    host="localhost", port=10021
-) -> A2AStarletteApplication:
+def create_orchestration_agent_server() -> A2AStarletteApplication:
     """Create A2A server for Orchestration Agent using the unified wrapper."""
     return create_agent_a2a_server(
         agent=orchestration_agent,
         name=OrchestrationAgentCard.name,
         description=OrchestrationAgentCard.description,
         skills=OrchestrationAgentCard.skills,
-        host=host,
-        port=port,
+        host=OrchestrationAgentCard.host,
+        port=OrchestrationAgentCard.port,
         status_message="Searching for Calendar events...",
         artifact_name="response",
     )
 
 
-agents: list[Dict[str, Callable[[str, int], A2AStarletteApplication]]] = [
+agents = [
     {
-        "name": "Gmail Agent",
+        "name": GmailAgentCard.name,
         "agent": create_gmail_agent_server,
-        "port": 10020,
+        "port": GmailAgentCard.port,
     },
     {
-        "name": "Todoist Agent",
+        "name": TodoistAgentCard.name,
         "agent": create_todoist_agent_server,
-        "port": 10022,
+        "port": TodoistAgentCard.port,
     },
     {
-        "name": "Calendar Agent",
+        "name": CalendarAgentCard.name,
         "agent": create_calendar_agent_server,
-        "port": 10023,
+        "port": CalendarAgentCard.port,
     },
     {
-        "name": "Orchestration Agent",
+        "name": OrchestrationAgentCard.name,
         "agent": create_orchestration_agent_server,
-        "port": 10024,
+        "port": OrchestrationAgentCard.port,
     },
 ]
+
 
 # Start agent servers with corrected function calls
 print("Starting agent servers...\n")
