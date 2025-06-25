@@ -1,7 +1,10 @@
+"""Agent Card module."""
+
+from pydantic import BaseModel
 from a2a.types import AgentSkill
 
 
-class ObsidianAgentCard:
+class ObsidianAgentCard(BaseModel):
     """
     This agent is used to manage the Obsidian vault.
     """

@@ -1,11 +1,12 @@
-import requests
 import os
+
+import requests
 
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")  # Get token from environment variable
 BASE_URL = "https://api.github.com/repos"
 
 
-def get_github_folder_contents(owner, repo, path=""):
+def get_github_folder_contents(owner: str, repo: str, path: str = "") -> dict:
     """
     Fetches the contents of a given folder in a GitHub repository.
     Recursively fetches contents of subfolders to build a complete tree.
@@ -28,7 +29,6 @@ def get_github_folder_contents(owner, repo, path=""):
     for item in contents:
         name = item["name"]
         item_type = item["type"]
-        html_url = item["html_url"]  # Useful for direct links
 
         if item_type == "dir":
             # Recursively get contents of subdirectories
@@ -39,7 +39,9 @@ def get_github_folder_contents(owner, repo, path=""):
     return folder_tree
 
 
-def print_folder_tree(tree, indent=0, prefix="", is_last=True):
+def print_folder_tree(
+    tree: dict, indent: int = 0, prefix: str = "", is_last: bool = True
+):
     """Prints the folder tree in an organized format using tree-style syntax."""
     items = list(tree.items())
     for i, (name, content) in enumerate(items):

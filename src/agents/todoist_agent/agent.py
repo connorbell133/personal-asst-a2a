@@ -1,24 +1,22 @@
 """Agent module."""
 
 from pydantic_ai import Agent, RunContext
-
-from src.mcp_handler.mcp_todoist import server
 from dotenv import load_dotenv
+
+from src.mcp_handler.mcp_todoist import server as todoist_server
 
 load_dotenv(override=True)
 
-agent = Agent(
+todoist_agent = Agent(
     model="google-gla:gemini-2.5-flash",
-    mcp_servers=[server],
+    mcp_servers=[todoist_server],
 )
 
 
-@agent.system_prompt
+@todoist_agent.system_prompt
 def review_agent_system_prompt(ctx: RunContext) -> str:
     """
     Returns the comprehensive system prompt for the AI-powered GitHub Pull Request review agent.
-
-    The prompt provides detailed, step-by-step instructions for conducting a multi-phase PR review, including technical analysis, lint report evaluation, interactive feedback, risk assessment, and actionable review comment generation. It specifies the required comment format, outlines the use of available GitHub MCP tools, and defines the expected structure and tone for the agent's output. The prompt is dynamically populated with PR metadata from the provided context.
     """
     return """
 You are an expert Todoist Task Management Agent. Your primary responsibility is to understand user requests related to their Todoist tasks and accurately utilize the available tools to fulfill these requests. You must operate exclusively through the provided MCP server tools.
@@ -69,11 +67,12 @@ You are capable of handling requests that require multiple actions or tool calls
 
 
 async def run_todoist_agent(task: str) -> str:
-    async with agent.run_mcp_servers():
-        result = await agent.run(
+    """Run Todoist Agent function."""
+    async with todoist_agent.run_mcp_servers():
+        result = await todoist_agent.run(
             task,
         )
         return result.output
 
 
-app = agent.to_a2a()
+app = todoist_agent.to_a2a()

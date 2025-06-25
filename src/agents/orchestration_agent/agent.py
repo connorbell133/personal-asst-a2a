@@ -1,7 +1,7 @@
 """Agent module."""
 
-from pydantic_ai import Agent, RunContext
 from dotenv import load_dotenv
+from pydantic_ai import Agent
 
 load_dotenv(override=True)
 
@@ -12,7 +12,6 @@ def personal_assistant_system_prompt() -> str:
     """
     Returns the comprehensive system prompt for the AI-powered GitHub Pull Request review agent.
 
-    The prompt provides detailed, step-by-step instructions for conducting a multi-phase PR review, including technical analysis, lint report evaluation, interactive feedback, risk assessment, and actionable review comment generation. It specifies the required comment format, outlines the use of available GitHub MCP tools, and defines the expected structure and tone for the agent's output. The prompt is dynamically populated with PR metadata from the provided context.
     """
     return """
 You are an AI-powered personal assistant designed to help with a wide range of tasks by leveraging specialized tools. Your primary goal is to understand the user's request, determine the most appropriate tool(s) to use (Todoist, Calendar, Gmail), execute the necessary actions, and provide a clear, concise, and helpful response.
@@ -56,6 +55,9 @@ Here's how you should operate:
 
 
 def create_orchestration_agent(tools):
+    """
+    Create an orchestration agent.
+    """
     agent = Agent(
         model="google-gla:gemini-2.5-pro",
         name="personal_assistant_agent",
@@ -63,46 +65,3 @@ def create_orchestration_agent(tools):
         system_prompt=personal_assistant_system_prompt,
     )
     return agent
-
-
-# # @agent.tool
-# async def todoist_agent(ctx: RunContext, task: str) -> str:
-#     """
-#     Returns the comprehensive system prompt for the AI-powered GitHub Pull Request review agent.
-
-#     The prompt provides detailed, step-by-step instructions for conducting a multi-phase PR review, including technical analysis, lint report evaluation, interactive feedback, risk assessment, and actionable review comment generation. It specifies the required comment format, outlines the use of available GitHub MCP tools, and defines the expected structure and tone for the agent's output. The prompt is dynamically populated with PR metadata from the provided context.
-#     """
-#     response = await run_todoist_agent(task)
-#     return response
-
-
-# # @agent.tool
-# async def calendar_agent(ctx: RunContext, task: str) -> str:
-#     """
-#     Returns the comprehensive system prompt for the AI-powered GitHub Pull Request review agent.
-
-#     The prompt provides detailed, step-by-step instructions for conducting a multi-phase PR review, including technical analysis, lint report evaluation, interactive feedback, risk assessment, and actionable review comment generation. It specifies the required comment format, outlines the use of available GitHub MCP tools, and defines the expected structure and tone for the agent's output. The prompt is dynamically populated with PR metadata from the provided context.
-#     """
-#     response = await run_calendar_agent(task)
-#     return response
-
-
-# # @agent.tool
-# async def gmail_agent(ctx: RunContext, task: str) -> str:
-#     """
-#     Returns the comprehensive system prompt for the AI-powered GitHub Pull Request review agent.
-#     """
-#     response = await run_gmail_agent(task)
-#     return response
-
-
-async def run_personal_assistant(task: str) -> str:
-    """
-    This function orchestrates the execution of the personal assistant.
-
-    Args:
-        task (str): The task to be executed.
-
-    Returns:
-        str: The result of the task execution.
-    """

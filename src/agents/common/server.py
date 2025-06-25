@@ -1,13 +1,15 @@
+"""Server module."""
+
 import asyncio
 import threading
 
 import uvicorn
-
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
 from a2a.server.tasks import InMemoryTaskStore
 from a2a.types import AgentCapabilities, AgentCard
 from pydantic_ai import Agent
+
 from src.agents.common.agent_executor import PydanticAgentExecutor
 
 servers = []
@@ -86,6 +88,7 @@ def run_agent_in_background(create_agent_function, port, name):
     """Run an agent server in a background thread."""
 
     def run() -> None:
+        """Run function."""
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:

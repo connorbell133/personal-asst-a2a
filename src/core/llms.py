@@ -1,5 +1,8 @@
+"""Llms module."""
+
 import os
 from typing import Union
+
 from openai import OpenAI
 
 client = OpenAI(
@@ -13,6 +16,9 @@ def completion(
     messages: Union[list[dict], str],
     system_prompt: str = "",
 ) -> str:
+    """
+    Generate a completion using the OpenAI API.
+    """
     if not model:
         raise ValueError("Model parameter is required")
     final_messages = []

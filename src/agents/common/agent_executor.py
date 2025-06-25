@@ -1,13 +1,15 @@
+"""Agent Executor module."""
+
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.server.tasks import TaskUpdater
 from a2a.types import Part, TaskState, TextPart
 from a2a.utils import new_agent_text_message, new_task
-from pydantic_ai import Agent
 from google.adk.artifacts import InMemoryArtifactService
 from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
+from pydantic_ai import Agent
 
 
 class PydanticAgentExecutor(AgentExecutor):
@@ -40,6 +42,7 @@ class PydanticAgentExecutor(AgentExecutor):
         # Implementation for cancelling tasks
 
     async def execute(self, context: RequestContext, event_queue: EventQueue) -> None:
+        """Execute function."""
         query = context.get_user_input()
         task = context.current_task or new_task(context.message)
         await event_queue.enqueue_event(task)
