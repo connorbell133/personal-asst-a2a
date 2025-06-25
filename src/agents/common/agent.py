@@ -21,7 +21,16 @@ class BaseAgentConfig(BaseModel):
 
 def load_agent_config(config_path: str) -> BaseAgentConfig:
     """
-    Create an agent from a config file.
+    Load and validate an agent configuration from a YAML file.
+    
+    Parameters:
+        config_path (str): Path to the YAML configuration file.
+    
+    Returns:
+        BaseAgentConfig: An instance of BaseAgentConfig populated with the loaded configuration.
+    
+    Raises:
+        ValueError: If the configuration file is invalid or fails schema validation.
     """
     agent_config = None
     with open(config_path, "r", encoding="utf-8") as f:
@@ -34,17 +43,12 @@ def load_agent_config(config_path: str) -> BaseAgentConfig:
 
 def run_agent_in_background(create_agent_function, port, name):
     """
-    Starts an agent server in a background daemon thread.
-
-    The agent server is created using the provided factory function and runs asynchronously on the specified port. Any exceptions during server execution are printed with the agent's name.
-
-    Parameters:
-        create_agent_function: A callable that returns the agent instance to be served.
-        port (int): The port number on which the server will listen.
-        name (str): The name of the agent, used for error reporting.
-
+    Launches an agent server in a background daemon thread.
+    
+    Creates and starts a daemon thread that runs the agent server asynchronously on the specified port using the provided factory function. Any exceptions during server execution are printed with the agent's name.
+    
     Returns:
-        threading.Thread: The background thread running the agent server.
+        threading.Thread: The daemon thread running the agent server.
     """
 
     def run() -> None:
