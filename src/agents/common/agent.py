@@ -22,19 +22,23 @@ class BaseAgentConfig(BaseModel):
 def load_agent_config(config_path: str) -> BaseAgentConfig:
     """
     Load and validate an agent configuration from a YAML file.
-    
+
     Parameters:
         config_path (str): Path to the YAML configuration file.
-    
+
     Returns:
         BaseAgentConfig: An instance of BaseAgentConfig populated with the loaded configuration.
-    
+
     Raises:
         ValueError: If the configuration file is invalid or fails schema validation.
+        FileNotFoundError: If the configuration file does not exist.
     """
     agent_config = None
-    with open(config_path, "r", encoding="utf-8") as f:
-        agent_config = yaml.safe_load(f)
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            agent_config = yaml.safe_load(f)
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"Config file not found: {config_path}") from e
     try:
         return BaseAgentConfig(**agent_config)
     except ValidationError as e:
@@ -44,9 +48,9 @@ def load_agent_config(config_path: str) -> BaseAgentConfig:
 def run_agent_in_background(create_agent_function, port, name):
     """
     Launches an agent server in a background daemon thread.
-    
+
     Creates and starts a daemon thread that runs the agent server asynchronously on the specified port using the provided factory function. Any exceptions during server execution are printed with the agent's name.
-    
+
     Returns:
         threading.Thread: The daemon thread running the agent server.
     """

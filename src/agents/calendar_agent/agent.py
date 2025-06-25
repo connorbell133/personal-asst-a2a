@@ -36,10 +36,10 @@ calendar_agent = Agent(
 async def run_calendar_agent(task: str) -> str:
     """
     Runs the calendar agent asynchronously to process a specified task and returns the agent's response.
-    
+
     Parameters:
         task (str): The instruction or request for the calendar agent to handle.
-    
+
     Returns:
         str: The output produced by the calendar agent for the given task.
     """
