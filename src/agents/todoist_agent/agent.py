@@ -2,7 +2,6 @@
 
 from pydantic_ai import Agent
 from dotenv import load_dotenv
-from pydantic import BaseModel
 from a2a.types import AgentSkill
 
 from src.mcp_servers import todoist_server
@@ -13,7 +12,7 @@ load_dotenv(override=True)
 todoist_agent_config = load_agent_config("src/agents/todoist_agent/config.yml")
 
 
-class TodoistAgentCard(BaseModel):
+class TodoistAgentCard:
     """
     Todoist Agent Card.
     """
@@ -22,7 +21,8 @@ class TodoistAgentCard(BaseModel):
     description: str = todoist_agent_config.description
     skills: list[AgentSkill] = []
     organization: str = todoist_agent_config.name
-    url: str = todoist_agent_config.endpoint
+    port: int = todoist_agent_config.port
+    host: str = todoist_agent_config.host
 
 
 todoist_agent = Agent(
