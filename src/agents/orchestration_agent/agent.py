@@ -30,8 +30,8 @@ class OrchestrationAgentCard:
 
 
 orchestration_agent = Agent(
-    model="google-gla:gemini-2.5-pro",
-    name="personal_assistant_agent",
+    model=orchestration_agent_config.model,
+    name=orchestration_agent_config.name,
     tools=[a2a_client.list_remote_agents, a2a_client.create_task],
     system_prompt=orchestration_agent_config.system_prompt,
 )

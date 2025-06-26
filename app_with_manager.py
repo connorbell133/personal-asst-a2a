@@ -1,6 +1,7 @@
 import asyncio
 import time
 import logfire
+import requests
 
 from src.agents import (
     run_agent_in_background,
@@ -93,8 +94,31 @@ def main():
             run_agent_in_background(agent["agent"], agent["port"], agent["name"])
         )
 
-    # Wait for servers to start
-    time.sleep(3)
+    # Wait for servers to become healthy
+    max_wait = 30  # seconds
+    start_time = time.time()
+
+    while time.time() - start_time < max_wait:
+        if all(thread.is_alive() for thread in threads):
+            # Additional health check: try to reach agent endpoints
+            all_healthy = True
+            for agent in agents:
+                try:
+                    response = requests.get(
+                        f"http://localhost:{agent['port']}/.well-known/agent.json",
+                        timeout=1,
+                    )
+                    if response.status_code != 200:
+                        all_healthy = False
+                        break
+                except:
+                    all_healthy = False
+                    break
+
+            if all_healthy:
+                break
+
+        time.sleep(0.5)
 
     # Check if threads are alive
     if all(thread.is_alive() for thread in threads):
