@@ -3,7 +3,6 @@
 import logfire
 from dotenv import load_dotenv
 from pydantic_ai import Agent, RunContext
-from pydantic import BaseModel
 from a2a.types import AgentSkill
 from src.agents.common.agent import load_agent_config
 from src.agents.tools.github_tools import (
@@ -19,7 +18,7 @@ load_dotenv(override=True)
 obsidian_agent_config = load_agent_config("src/agents/obsidian_agent/config.yml")
 
 
-class ObsidianAgentCard(BaseModel):
+class ObsidianAgentCard:
     """
     This agent is used to manage the Obsidian vault.
     """
@@ -28,7 +27,8 @@ class ObsidianAgentCard(BaseModel):
     description: str = obsidian_agent_config.description
     skills: list[AgentSkill] = []
     organization: str = obsidian_agent_config.name
-    url: str = obsidian_agent_config.endpoint
+    host: str = obsidian_agent_config.host
+    port: int = obsidian_agent_config.port
 
 
 obsidian_agent = Agent(

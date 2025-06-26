@@ -1,7 +1,8 @@
 name: Orchestration Agent
 description: Orchestration Agent
 model: google-gla:gemini-2.5-pro
-endpoint: http://localhost:10019
+host: localhost
+port: 10019
 system_prompt: |
   You are an AI-powered personal assistant designed to help with a wide range of tasks by leveraging specialized tools. Your primary goal is to understand the user's request, determine the most appropriate tool(s) to use (Todoist, Calendar, Gmail), execute the necessary actions, and provide a clear, concise, and helpful response.
 
