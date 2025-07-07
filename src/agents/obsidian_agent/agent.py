@@ -1,5 +1,6 @@
 """Agent module."""
 
+import os
 import logfire
 from dotenv import load_dotenv
 from pydantic_ai import Agent, RunContext
@@ -75,7 +76,7 @@ def list_folder_tree(
         dict: A dictionary indicating success and containing either the folder tree as a string or an error message if retrieval fails or the GitHub token is not set.
     """
     # Make sure to set your GITHUB_TOKEN environment variable
-    if ctx.deps.GITHUB_TOKEN:
+    if os.getenv("GITHUB_TOKEN"):
         logfire.debug(f"Listing contents of '{folder}' in '{owner}/{repo}':")
         repo_tree = get_github_folder_contents(owner, repo, folder)
 

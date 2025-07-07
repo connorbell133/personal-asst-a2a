@@ -186,7 +186,7 @@ async def orchestration_create_task(request: Request):
 
     try:
         trending_topics = await a2a_client.create_task(
-            "http://localhost:10021",
+            "http://localhost:10019",
             body["user_input"],
         )
 
