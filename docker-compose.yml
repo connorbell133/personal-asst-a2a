@@ -1,0 +1,28 @@
+# docker-compose.yml
+services:
+  multi-agent:
+    build: .
+    volumes:
+      - gmail-server-data:/gmail-server
+      - gcal-server-data:/gcal-server
+      - ./gcp-oauth.keys.json:/gmail-server/credentials.json
+      - ./gcp-oauth.keys.json:/gcal-server/credentials.json
+    ports:
+      - "10019:10019"
+      - "10020:10020"
+      - "10021:10021"
+      - "10022:10022"
+      - "10023:10023"
+      - "8000:8000"
+    environment:
+      SERVER_HOST: "0.0.0.0"
+      GMAIL_CREDENTIALS_PATH: /gmail-server/credentials.json
+      GCALENDAR_CREDENTIALS_PATH: /gcal-server/credentials.json
+      TODOIST_API_TOKEN: ${TODOIST_API_TOKEN:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      GOOGLE_OAUTH_CREDENTIALS: /gmail-server/credentials.json
+
+volumes:
+  gmail-server-data: {}
+  gcal-server-data: {}

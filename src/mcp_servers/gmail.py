@@ -8,13 +8,6 @@ Returns:
     server: The MCP server for the GitHub Helper project.
 """
 
-from pydantic_ai.mcp import MCPServerStdio
+from pydantic_ai.mcp import MCPServerStreamableHTTP
 
-server = MCPServerStdio(
-    command="npx",
-    args=[
-        "--yes",
-        "@gongrzhe/server-gmail-autoauth-mcp",
-    ],
-    env={"GOOGLE_OAUTH_CREDENTIALS": "/Users/connor/assistant/gcp-oauth.keys.json"},
-)
+server = MCPServerStreamableHTTP(url="http://host.docker.internal:8001/mcp")

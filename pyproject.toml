@@ -9,7 +9,13 @@ readme = "README.md"
 requires-python = ">=3.12,<4.0"
 dependencies = [
     "a2a-sdk (==0.2.9)",
-    "dotenv",
+    "python-dotenv",
+    "pyyaml",
+    "requests",
+    "uvicorn[standard]",
+    "google-adk",
+    "logfire[httpx]",
+    "fastapi",
     "pydantic-ai-slim[a2a,google,mcp,logfire]"
 ]
 
