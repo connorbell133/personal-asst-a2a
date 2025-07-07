@@ -81,7 +81,12 @@ def get_github_file_contents(owner: str, repo: str, path: str) -> dict:
 
 def print_folder_tree(tree, indent=0, prefix="", is_last_item=True):
     """Prints the folder tree in an organized format using tree-style syntax."""
+    if tree is None:
+        return "Empty folder or access error"
+
     items = list(tree.items())
+    result = []
+
     for i, (name, content) in enumerate(items):
         is_last_item = i == len(items) - 1
 
@@ -94,10 +99,17 @@ def print_folder_tree(tree, indent=0, prefix="", is_last_item=True):
             next_prefix = "│   "
 
         if content == "file":
-            print(f"{prefix}{current_prefix}{name}")
+            result.append(f"{prefix}{current_prefix}{name}")
         else:
-            print(f"{prefix}{current_prefix}{name}")
-            print_folder_tree(content, indent + 1, prefix + next_prefix, is_last_item)
+            result.append(f"{prefix}{current_prefix}{name}")
+            if content is not None:
+                subtree_result = print_folder_tree(
+                    content, indent + 1, prefix + next_prefix, is_last_item
+                )
+                if subtree_result:
+                    result.append(subtree_result)
+
+    return "\n".join(result)
 
 
 def send_new_content_to_github(
