@@ -1,6 +1,5 @@
 import asyncio
 import time
-import logfire
 import requests
 
 from src.agents import (
@@ -20,16 +19,16 @@ from src.agents import (
 )
 
 
-try:
-    logfire.instrument_pydantic_ai()
-except AttributeError:
-    # Older versions of Logfire may not have this helper; skip gracefully.
-    pass
+# try:
+#     logfire.instrument_pydantic_ai()
+# except AttributeError:
+#     # Older versions of Logfire may not have this helper; skip gracefully.
+#     pass
 
-try:
-    logfire.instrument_httpx()
-except AttributeError:
-    pass
+# try:
+#     logfire.instrument_httpx()
+# except AttributeError:
+#     pass
 
 
 def register_all_agents():
@@ -111,7 +110,8 @@ def main():
                     if response.status_code != 200:
                         all_healthy = False
                         break
-                except:
+                except Exception as e:
+                    print(f"Error checking agent health: {e}")
                     all_healthy = False
                     break
 
@@ -145,13 +145,24 @@ def main():
 async def test_agent():
     """Test agent functionality."""
     # Query the Gmail Agent that is started above (running on port 10021)
-    trending_topics = await a2a_client.create_task(
-        "http://localhost:10021",
-        "has arda@getdelve.com sent me an email today?",
-    )
-    print(trending_topics)
+    while True:
+        user_input = input("Enter a task: ")
+        trending_topics = await a2a_client.create_task(
+            "http://localhost:10021",
+            user_input,
+        )
+        print(trending_topics)
 
 
-if __name__ == "__main__":
-    main()
-    asyncio.run(test_agent())
+# if __name__ == "__main__":
+#     main()
+#     asyncio.run(test_agent())
+
+# Ensure asyncio child watcher is set to avoid NotImplementedError when spawning subprocesses in threads
+if hasattr(asyncio, "ThreadedChildWatcher"):
+    try:
+        asyncio.get_event_loop_policy().set_child_watcher(
+            asyncio.ThreadedChildWatcher()
+        )
+    except NotImplementedError:
+        pass
