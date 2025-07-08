@@ -1,4 +1,5 @@
-
+token.json
+credentials.json
 uv.lock
 .ruff_cache/
 show_tree.py

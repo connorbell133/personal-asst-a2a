@@ -1,11 +1,14 @@
 """Llms module."""
 
 import os
-from typing import Union
+from typing import Union, Type
 
 from openai import OpenAI
+from google import genai
+from pydantic import BaseModel
 
-client = OpenAI(
+
+openai_client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=os.getenv("OPENROUTER_API_KEY"),
 )
@@ -41,7 +44,7 @@ def completion(
     else:
         final_messages.extend(messages)
     try:
-        response = client.chat.completions.create(
+        response = openai_client.chat.completions.create(
             model=model,
             messages=final_messages,
         )
@@ -50,3 +53,26 @@ def completion(
         return response.choices[0].message.content
     except Exception as e:
         raise RuntimeError(f"Failed to generate completion: {str(e)}") from e
+
+
+genai_client = genai.Client()
+
+
+def structured_completion(
+    model: str,
+    contents: str,
+    response_schema: Type[BaseModel],
+) -> Type[BaseModel]:
+    """
+    Generate a structured completion using the Google AI API.
+    """
+    response = genai_client.models.generate_content(
+        model=model,
+        contents=contents,
+        config={
+            "response_mime_type": "application/json",
+            "response_schema": response_schema,
+        },
+    )
+    parsed_response: response_schema = response.parsed
+    return parsed_response

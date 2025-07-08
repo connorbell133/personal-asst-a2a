@@ -16,7 +16,9 @@ dependencies = [
     "google-adk",
     "logfire[httpx]",
     "fastapi",
-    "pydantic-ai-slim[a2a,google,mcp,logfire]"
+    "pydantic-ai-slim[a2a,google,mcp,logfire]",
+    "google-auth-oauthlib>=1.2.2",
+    "openai>=1.93.1",
 ]
 
 [project.optional-dependencies]
