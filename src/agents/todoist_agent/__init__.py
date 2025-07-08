@@ -1,4 +1,5 @@
-from .agent import agent as todoist_agent
-from .agent_card import TodoistAgentCard
+"""Todoist Agent module module."""
+
+from .agent import todoist_agent, TodoistAgentCard
 
 __all__ = ["todoist_agent", "TodoistAgentCard"]

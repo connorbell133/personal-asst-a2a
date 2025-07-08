@@ -9,8 +9,25 @@ readme = "README.md"
 requires-python = ">=3.12,<4.0"
 dependencies = [
     "a2a-sdk (==0.2.9)",
-    "dotenv",
-    "pydantic-ai-slim[a2a,google,mcp,logfire]"
+    "python-dotenv",
+    "pyyaml",
+    "requests",
+    "uvicorn[standard]",
+    "google-adk",
+    "logfire[httpx]",
+    "fastapi",
+    "pydantic-ai-slim[a2a,google,mcp,logfire]",
+    "google-auth-oauthlib>=1.2.2",
+    "openai>=1.93.1",
+    "mem0ai (>=0.1.114,<0.2.0)",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "pylint>=3.0.0",
+    "pytest>=7.0.0"
 ]
 
 [tool.poetry]
@@ -19,3 +36,11 @@ packages = [{include = "src"}]
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pylint.messages_control]
+disable = [
+    "import-error",
+    "unused-argument",
+    "too-few-public-methods",
+    "line-too-long",
+]

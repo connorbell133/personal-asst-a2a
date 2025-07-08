@@ -1,15 +1,25 @@
-import os
-import requests
+"""Tools module."""
+
 import base64
+import os
+
+import requests
 
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")  # Get token from environment variable
 BASE_URL = "https://api.github.com/repos"
 
 
-def get_github_folder_contents(owner, repo, path=""):
+def get_github_folder_contents(owner: str, repo: str, path: str = "") -> dict:
     """
-    Fetches the contents of a given folder in a GitHub repository.
-    Recursively fetches contents of subfolders to build a complete tree.
+    Recursively retrieves the contents of a folder in a GitHub repository as a nested dictionary.
+
+    Parameters:
+        owner (str): The GitHub username or organization name.
+        repo (str): The name of the repository.
+        path (str, optional): The folder path within the repository. Defaults to the root directory.
+
+    Returns:
+        dict: A nested dictionary representing the folder structure, where subfolders are nested dictionaries and files are marked with the string "file". Returns None if the request fails.
     """
     url = f"{BASE_URL}/{owner}/{repo}/contents/{path}"
     headers = {
@@ -18,7 +28,7 @@ def get_github_folder_contents(owner, repo, path=""):
     }
 
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()  # Raise an HTTPError for bad responses (4xx or 5xx)
         contents = response.json()
     except requests.exceptions.RequestException as e:
@@ -29,7 +39,6 @@ def get_github_folder_contents(owner, repo, path=""):
     for item in contents:
         name = item["name"]
         item_type = item["type"]
-        html_url = item["html_url"]  # Useful for direct links
 
         if item_type == "dir":
             # Recursively get contents of subdirectories
@@ -40,9 +49,11 @@ def get_github_folder_contents(owner, repo, path=""):
     return folder_tree
 
 
-def get_github_file_contents(owner, repo, path):
+def get_github_file_contents(owner: str, repo: str, path: str) -> dict:
     """
-    Fetches the contents of a given file in a GitHub repository.
+    Retrieve the contents of a markdown file from a GitHub repository.
+
+    Returns a dictionary with the decoded file contents if the file is a markdown file; otherwise, returns an error dictionary.
     """
 
     # check if the file is a markdown file
@@ -58,7 +69,7 @@ def get_github_file_contents(owner, repo, path):
         "Accept": "application/vnd.github.v3+json",
         "Authorization": f"Bearer {GITHUB_TOKEN}",
     }
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=10)
     response.raise_for_status()
 
     # load contents from  the content base64 encoded
@@ -70,7 +81,12 @@ def get_github_file_contents(owner, repo, path):
 
 def print_folder_tree(tree, indent=0, prefix="", is_last_item=True):
     """Prints the folder tree in an organized format using tree-style syntax."""
+    if tree is None:
+        return "Empty folder or access error"
+
     items = list(tree.items())
+    result = []
+
     for i, (name, content) in enumerate(items):
         is_last_item = i == len(items) - 1
 
@@ -83,16 +99,32 @@ def print_folder_tree(tree, indent=0, prefix="", is_last_item=True):
             next_prefix = "│   "
 
         if content == "file":
-            print(f"{prefix}{current_prefix}{name}")
+            result.append(f"{prefix}{current_prefix}{name}")
         else:
-            print(f"{prefix}{current_prefix}{name}")
-            print_folder_tree(content, indent + 1, prefix + next_prefix, is_last_item)
+            result.append(f"{prefix}{current_prefix}{name}")
+            if content is not None:
+                subtree_result = print_folder_tree(
+                    content, indent + 1, prefix + next_prefix, is_last_item
+                )
+                if subtree_result:
+                    result.append(subtree_result)
+
+    return "\n".join(result)
 
 
 def send_new_content_to_github(
     note_path: str, content: str, owner: str, repo: str
 ) -> dict:
-    """Send the new content to github."""
+    """
+    Create or update a file in a GitHub repository with the specified content.
+
+    Parameters:
+        note_path (str): The path to the file in the repository.
+        content (str): The new content to write to the file.
+
+    Returns:
+        dict: The JSON response from the GitHub API after the file operation.
+    """
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{note_path}"
     headers = {
         "Accept": "application/vnd.github+json",
@@ -104,16 +136,26 @@ def send_new_content_to_github(
         "committer": {"name": "Monalisa Octocat", "email": "octocat@github.com"},
         "content": base64.b64encode(content.encode()).decode(),
     }
-    response = requests.put(url, headers=headers, json=data)
+    response = requests.put(url, headers=headers, json=data, timeout=10)
     return response.json()
 
 
 def delete_note_from_github(note_path: str, owner: str, repo: str) -> dict:
-    """Delete the given note from github."""
+    """
+    Deletes a file at the specified path from a GitHub repository.
+
+    Parameters:
+        note_path (str): The path to the file to delete within the repository.
+        owner (str): The GitHub username or organization that owns the repository.
+        repo (str): The name of the GitHub repository.
+
+    Returns:
+        dict: The JSON response from the GitHub API after attempting to delete the file.
+    """
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{note_path}"
     headers = {
         "Accept": "application/vnd.github+json",
         "Authorization": f"Bearer {GITHUB_TOKEN}",
     }
-    response = requests.delete(url, headers=headers)
+    response = requests.delete(url, headers=headers, timeout=10)
     return response.json()

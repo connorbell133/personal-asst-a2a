@@ -1,8 +1,13 @@
-from .agent import create_orchestration_agent, personal_assistant_system_prompt
-from .agent_card import OrchestrationAgentCard
+"""Orchestration Agent module module."""
+
+from .agent import (
+    OrchestrationAgentCard,
+    orchestration_agent,
+    a2a_client,
+)
 
 __all__ = [
-    "create_orchestration_agent",
     "OrchestrationAgentCard",
-    "personal_assistant_system_prompt",
+    "orchestration_agent",
+    "a2a_client",
 ]

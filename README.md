@@ -1,7 +1,9 @@
 # Personal Assistant A2A
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python Version](https://img.shields.io/badge/python-3.13%2B-blue)
+![Python Version](https://img.shields.io/badge/python-3.12%2B-blue)
+![GitHub issues](https://img.shields.io/github/issues/connorbell133/personal-asst-a2a)
+![GitHub stars](https://img.shields.io/github/stars/connorbell133/personal-asst-a2a)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
 > **Personal Assistant A2A** is a **privacy-first, multi-agent assistant** that connects to your Gmail, Google Calendar and Todoist accounts and answers natural-language questions such as "Do I have any overdue tasks for today?" or "What meetings do I have right after lunch tomorrow?".

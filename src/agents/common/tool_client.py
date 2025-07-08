@@ -1,3 +1,5 @@
+"""Tool Client module."""
+
 import json
 import uuid
 from typing import Any
@@ -13,25 +15,26 @@ import requests
 try:
     import logfire
 
-    if hasattr(logfire, "configure"):
-        # We only need to call configure once per process. If the user has
-        # already configured Logfire (e.g. in ``app.py``) this call will be a
-        # no-op. We still add it here so that the module can be imported and
-        # used stand-alone in other scripts without additional setup.
-        logfire.configure(send_to_logfire=False)
+    # Configure Logfire only if it hasn't been configured elsewhere to avoid overriding
+    # global settings such as remote token, sampling, etc.
 
-        # Instrument common libraries used by the tool client so that HTTP
-        # traffic appears automatically in Logfire's Live view.
-        for _instr in (
-            getattr(logfire, "instrument_httpx", None),
-            getattr(logfire, "instrument_requests", None),
-        ):
-            if callable(_instr):
-                try:
-                    _instr()
-                except Exception:
-                    # Instrumentation failure shouldn't crash the app.
-                    pass
+    if hasattr(logfire, "configure") and not getattr(logfire, "_configured", False):  # type: ignore[attr-defined]
+        # Fallback local-only configuration so traces still appear in the console when
+        # the main application didn't run Logfire setup.
+        logfire.configure(send_to_logfire="if-token-present")
+
+    # Instrument common libraries used by the tool client so that HTTP
+    # traffic appears automatically in Logfire's Live view.
+    for _instr in (
+        getattr(logfire, "instrument_httpx", None),
+        getattr(logfire, "instrument_requests", None),
+    ):
+        if callable(_instr):
+            try:
+                _instr()
+            except Exception:
+                # Instrumentation failure shouldn't crash the app.
+                pass
 
     # Expose decorator helper only if Logfire import succeeded
     span = getattr(logfire, "instrument", lambda *a, **k: (lambda f: f))
@@ -40,7 +43,16 @@ except ModuleNotFoundError:
     # Logfire not installed; define a no-op decorator so the rest of the code
     # still imports and works.
     def span(*_args, **_kwargs):  # type: ignore
+        """
+        A no-op decorator that acts as a placeholder for span tracing when Logfire is unavailable.
+
+        This decorator can be applied to functions to maintain compatibility with tracing instrumentation, but it does not modify the behavior of the decorated function.
+        """
+
         def _decorator(func):
+            """
+            A no-op decorator that returns the original function unchanged.
+            """
             return func
 
         return _decorator

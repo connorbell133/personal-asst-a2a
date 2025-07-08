@@ -1,10 +1,8 @@
-.env.example
-uv.lock
 token.json
 credentials.json
+uv.lock
+.ruff_cache/
 show_tree.py
-gcp-oauth.keys.json
-
 # Python-generated files
 __pycache__/
 *.py[oc]
@@ -12,7 +10,7 @@ build/
 dist/
 wheels/
 *.egg-info
-
+gcp-oauth.keys.json
 # Virtual environments
 .venv
 
