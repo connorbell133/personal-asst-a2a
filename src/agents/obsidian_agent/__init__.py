@@ -1,4 +1,5 @@
-from .agent import agent as gmail_agent
-from .agent_card import GmailAgentCard
+"""Obsidian Agent module module."""
 
-__all__ = ["gmail_agent", "GmailAgentCard"]
+from .agent import obsidian_agent, ObsidianAgentCard
+
+__all__ = ["obsidian_agent", "ObsidianAgentCard"]

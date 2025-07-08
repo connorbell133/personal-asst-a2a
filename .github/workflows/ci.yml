@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+    - name: Install dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: |
+        poetry install --no-interaction --no-root
+        pip install black>=23.0.0 ruff>=0.1.0 pylint>=3.0.0 pytest>=7.0.0
+
+    - name: Install project
+      run: |
+        poetry install --no-interaction
+        pip install black>=23.0.0 ruff>=0.1.0 pylint>=3.0.0 pytest>=7.0.0
+
+    - name: Run Ruff Linter
+      run: |
+        ruff check src/ --output-format=github
+
+    - name: Run Ruff Formatter Check
+      run: |
+        ruff format --check src/
+
+    - name: Run Pylint
+      run: |
+        pylint src/ --output-format=colorized --reports=no --score=no --rcfile=pyproject.toml
+
+    - name: Run tests (if present)
+      run: |
+        if [ -d "tests" ] || find . -name "test_*.py" -o -name "*_test.py" | grep -q .; then
+          poetry run pytest -v --tb=short
+        else
+          echo "No tests found, skipping test step"
+        fi
+      continue-on-error: true 

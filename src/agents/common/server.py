@@ -1,13 +1,16 @@
+"""Server module."""
+
 import asyncio
 import threading
+import os
 
 import uvicorn
-
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
 from a2a.server.tasks import InMemoryTaskStore
 from a2a.types import AgentCapabilities, AgentCard
 from pydantic_ai import Agent
+
 from src.agents.common.agent_executor import PydanticAgentExecutor
 
 servers = []
@@ -71,9 +74,13 @@ async def run_uvicorn_server(create_agent_function, port):
     """Run server with proper error handling."""
     try:
         print(f"🚀 Starting agent on port {port}...")
-        app = create_agent_function(port=port)
+        app = create_agent_function()
+
+        # Use SERVER_HOST environment variable, fallback to 0.0.0.0 for Docker compatibility
+        host = os.getenv("SERVER_HOST", "0.0.0.0")
+
         config = uvicorn.Config(
-            app.build(), host="127.0.0.1", port=port, log_level="error", loop="asyncio"
+            app.build(), host=host, port=port, log_level="error", loop="asyncio"
         )
         server = uvicorn.Server(config)
         servers.append(server)
@@ -83,9 +90,18 @@ async def run_uvicorn_server(create_agent_function, port):
 
 
 def run_agent_in_background(create_agent_function, port, name):
-    """Run an agent server in a background thread."""
+    """
+    Start an agent server in a separate daemon thread.
+
+    The agent server is created using the provided factory function and runs asynchronously on the specified port. Returns the thread object managing the server.
+    """
 
     def run() -> None:
+        """
+        Initializes a new asyncio event loop and runs the Uvicorn server coroutine for the agent application.
+
+        This function is intended to be used as a thread target for running agent servers in the background.
+        """
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:

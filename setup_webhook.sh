@@ -1,1 +1,0 @@
-smee --url https://smee.io/XF0lRc9NJVK7bfw --path /webhook --port 3000
