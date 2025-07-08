@@ -194,9 +194,7 @@ def get_emails_sent_to_addresses(addresses: list[str], max_results: int = 100):
             results = (
                 service.users()  # pylint: disable=no-member
                 .messages()
-                .list(
-                    userId="me", q=query, maxResults=max_results
-                )  # pylint: disable=no-member
+                .list(userId="me", q=query, maxResults=max_results)  # pylint: disable=no-member
                 .execute()
             )
             messages = results.get("messages", [])
@@ -248,9 +246,7 @@ def get_emails_sent_from_addresses(addresses: list[str], max_results: int = 100)
             results = (
                 service.users()  # pylint: disable=no-member
                 .messages()
-                .list(
-                    userId="me", q=query, maxResults=max_results
-                )  # pylint: disable=no-member
+                .list(userId="me", q=query, maxResults=max_results)  # pylint: disable=no-member
                 .execute()
             )
             messages = results.get("messages", [])
