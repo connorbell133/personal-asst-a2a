@@ -4,9 +4,9 @@ from datetime import datetime
 from dotenv import load_dotenv
 from pydantic_ai import Agent, RunContext
 from a2a.types import AgentSkill
-
 from src.mcp_servers.gmail import server as gmail_server
 from src.agents.common.agent import load_agent_config
+from src.core.logger import logger
 from src.agents.gmail_agent.tools import (
     get_email_by_id,
     get_tone_from_past_emails,
@@ -64,11 +64,12 @@ def get_toned_email_response(ctx: RunContext, email_id: str) -> EmailResponse:
         Email_Response: An object containing the generated reply email's full content,
                         its subject, and its body, formatted for sending.
     """
+    logger.info("Getting toned email response for email_id: %s", email_id)
     email = get_email_by_id(email_id)
     if not email:
         return "Error: Email not found"
     tone = get_tone_from_past_emails(email["from"])
-
+    logger.info("Tone: %s", tone)
     # --- Improved Prompt ---
     prompt = (
         "You are Connor Bell. Your goal is to draft a reply email that perfectly matches the established tone and style from your past correspondence."
@@ -98,11 +99,11 @@ def get_toned_email_response(ctx: RunContext, email_id: str) -> EmailResponse:
         "**Your response MUST be the complete email body only, ready to be sent, and should fit the `Email_Response` schema.**"  # Emphasized output format
     )
     # --- End Improved Prompt ---
-
+    logger.info("Prompt: %s", prompt)
     response: EmailResponse = structured_completion(
         model="gemini-2.5-flash",
         contents=prompt,
         response_schema=EmailResponse,
     )
-
+    logger.info("Response: %s", response)
     return response
