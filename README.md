@@ -2,89 +2,133 @@
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python Version](https://img.shields.io/badge/python-3.12%2B-blue)
+![GitHub issues](https://img.shields.io/github/issues/your-org/ai-asst-a2a)
+![GitHub stars](https://img.shields.io/github/stars/your-org/ai-asst-a2a)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
-> **AI Assistant A2A** is a **privacy-first, multi-agent assistant** powered by the [A2A SDK](https://github.com/pydantic/agent2agent) that connects to your Gmail, Google Calendar, Todoist, and Obsidian knowledge base to answer natural-language questions like "Do I have any overdue tasks for today?", "What meetings do I have right after lunch tomorrow?", or "What did we discuss in last week's project meeting?".
+> **AI Assistant A2A** is a **privacy-first, multi-agent personal assistant** built on top of [A2A SDK](https://github.com/pydantic/agent2agent) and [Pydantic AI](https://github.com/pydantic/pydantic-ai).  
+> It seamlessly connects to Gmail, Google Calendar, Todoist, and an Obsidian knowledge-base to answer questions such as:
 >
-> Built with **Pydantic AI** and **MCP (Model Context Protocol)**, each capability is implemented as a standalone microservice that can run locally, remotely, or in containers. A lightweight orchestration agent coordinates workflows across services to provide intelligent, context-aware responses.
+> • “Do I have any overdue tasks for today?”  
+> • “What meetings do I have right after lunch tomorrow?”  
+> • “Summarise what we discussed in last week’s project meeting.”
+>
+> Every capability runs **100 % locally** (unless you choose cloud LLMs), can be containerised, and is orchestrated by a lightweight coordination agent.
 
 ---
 
-## ✨ Key Features
+## ✨ Features
 
-- **🔒 Privacy-First**: 100% local execution - no data leaves your machine except intentional LLM API calls
-- **🏗️ Microservice Architecture**: Each agent runs as an independent Starlette server with A2A integration
-- **🤖 Dynamic Orchestration**: Central orchestration agent discovers available services and chains tools automatically
-- **🧠 Multi-Model Support**: Works with any OpenAI-compatible model (OpenAI, Anthropic, Google Vertex, OpenRouter)
-- **🔌 MCP Integration**: Leverages Model Context Protocol for secure, standardized tool access
-- **📚 Knowledge Management**: Full Obsidian vault integration for note management and knowledge retrieval
-- **📈 Observable**: Built-in Logfire integration for comprehensive monitoring and debugging
-- **🚀 Extensible**: Add new agents in ~100 lines of code with automatic discovery
+- **🔒 Privacy First**   Run locally, no data leaves your machine unless sent to an LLM provider you configure.
+- **🏗 Micro-Service Agents**   Each domain (Gmail, Calendar, Todoist, Obsidian) is an independent Starlette/FastAPI service.
+- **🤝 A2A & MCP**   Standardised Agent-to-Agent & Model-Context-Protocol interfaces for discovery + tool-chaining.
+- **🧠 LLM Agnostic**   Works with OpenAI, Anthropic, Google Vertex, OpenRouter or any OpenAI-compatible endpoint.
+- **📚 Knowledge Retrieval**   GitHub-backed Obsidian vault integration for reading, writing and organising notes.
+- **🔌 Extensible**   Add a brand-new agent in ~100 lines of code – orchestration discovers it automatically.
 
 ---
 
 ## 📚 Table of Contents
 
-1. [Quick Start](#-quick-start)
-2. [Architecture](#-architecture)
-3. [Project Structure](#-project-structure)
-4. [Configuration](#-configuration)
-5. [Running the System](#-running-the-system)
-6. [Adding New Agents](#-adding-new-agents)
-7. [Development](#-development)
-8. [API Documentation](#-api-documentation)
-9. [Contributing](#-contributing)
-10. [License](#-license)
+1. [Architecture](#architecture)  
+2. [Quick Start](#quick-start)  
+3. [Configuration](#configuration)  
+4. [Running](#running)  
+5. [Client CLI](#client-cli)  
+6. [Project Structure](#project-structure)  
+7. [Adding Agents](#adding-new-agents)  
+8. [Development](#development)  
+9. [Contributing](#contributing)  
+10. [License](#license)
+
+---
+
+## 🏗 Architecture
+
+```mermaid
+flowchart LR
+    subgraph User
+        U["User Query"]
+    end
+
+    subgraph OrchestrationAgent
+        ORCH["Orchestration Agent"]
+    end
+
+    subgraph DomainAgents
+        GMAIL[Gmail\nAgent]
+        CAL[Calendar\nAgent]
+        TODO[Todoist\nAgent]
+        OBSIDIAN[Obsidian\nAgent]
+    end
+
+    subgraph MCPServers
+        GMAIL_MCP[Gmail MCP\nServer]
+        CAL_MCP[Calendar MCP\nServer]
+        TODO_MCP[Todoist MCP\nServer]
+    end
+
+    U --> ORCH
+    ORCH -- "service discovery & tool chaining" --> DomainAgents
+    GMAIL --> GMAIL_MCP
+    CAL --> CAL_MCP
+    TODO --> TODO_MCP
+    OBSIDIAN --> ORCH
+    ORCH --> U
+```
+
+### Component Overview
+
+| Component | Port | Purpose |
+|-----------|------|---------|
+| **Gmail Agent** | `10020` | Search, read & send e-mails |
+| **Todoist Agent** | `10022` | Task & project management |
+| **Calendar Agent** | `10023` | Event retrieval & scheduling |
+| **Orchestration Agent** | `10024` | Intent routing and multi-agent workflows |
+| **Obsidian Agent** | `10025` | Knowledge management via GitHub-backed vault |
+
+> **Tip:** Ports are configurable via environment variables – see [Configuration](#configuration).
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
-
-- **Python 3.12+** (required by `pyproject.toml`)
-- **OpenAI-compatible API key** (OpenAI, OpenRouter, etc.)
-- **Google OAuth 2.0 credentials** for Gmail/Calendar access
-- **Todoist API token** for task management
-- **GitHub Personal Access Token** for Obsidian vault access (optional)
-
-### Installation
+### 1. Clone & install
 
 ```bash
-# Clone and enter the project
-git clone https://github.com/your-org/ai-asst-a2a.git
-cd ai-asst-a2a
+# Clone repository
+$ git clone https://github.com/your-org/ai-asst-a2a.git
+$ cd ai-asst-a2a
 
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+# Create virtual env
+$ python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 
-# Install dependencies with Poetry
-poetry install
-
-# Or with pip
-pip install -e .
+# Install
+$ pip install -e .
+# – or –
+$ poetry install
 ```
 
-### Configuration
+### 2. Configure secrets
 
-Create a `.env` file in the project root:
+Create a `.env` file:
 
-```env
-# LLM Provider (choose one)
+```dotenv
+# LLM provider (choose one)
 OPENAI_API_KEY=sk-...
-# or OPENROUTER_API_KEY=...
+# or OPENROUTER_API_KEY=or-...
 
-# Google Services
-GOOGLE_OAUTH_CREDENTIALS=/path/to/your/gcp-oauth.keys.json
+# Google services
+gcp-oauth.keys.json=/absolute/path/to/gcp-oauth.keys.json
+GOOGLE_OAUTH_CREDENTIALS=${gcp-oauth.keys.json}
 
 # Todoist
-TODOIST_API_TOKEN=your_todoist_token_here
+TODOIST_API_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxx
 
-# GitHub (for Obsidian integration)
-GITHUB_TOKEN=ghp_your_github_token_here
+# GitHub (for Obsidian)
+GITHUB_TOKEN=ghp_XXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-# Optional - Custom Ports
+# Optional – custom ports
 PORT_GMAIL=10020
 PORT_TODOIST=10022
 PORT_CALENDAR=10023
@@ -92,499 +136,226 @@ PORT_OBSIDIAN=10025
 PORT_ORCHESTRATION=10024
 ```
 
-Place your Google OAuth credentials JSON file in the project root as `gcp-oauth.keys.json`.
+Place your Google OAuth credentials JSON at the path you referenced above.
 
-### Launch
+### 3. Launch everything
 
 ```bash
-python app.py
+$ python app.py
 ```
 
-You'll see output like:
+After health-checks you should see:
 
 ```
 ✅ Agent servers are running!
-   - Gmail Agent: http://127.0.0.1:10020
-   - Todoist Agent: http://127.0.0.1:10022
-   - Calendar Agent: http://127.0.0.1:10023
-   - Obsidian Agent: http://127.0.0.1:10025
-   - Orchestration Agent: http://127.0.0.1:10024
+   • Gmail Agent:           http://127.0.0.1:10020
+   • Todoist Agent:         http://127.0.0.1:10022
+   • Calendar Agent:        http://127.0.0.1:10023
+   • Obsidian Agent:        http://127.0.0.1:10025
+   • Orchestration Agent:   http://127.0.0.1:10024
 ```
 
-The system will automatically demonstrate functionality with an example query.
+### 4. Try an interactive chat
+
+```bash
+$ python client.py
+```
+
+Type a question and watch the orchestration agent coordinate the other services in real-time.
 
 ---
 
-## 🏗 Architecture
+## ⚙️ Configuration
 
-The system follows a **microservice architecture** with the following components:
+All options are exposed via **environment variables** or the per-agent `config.yml` files.
 
-### Core Components
+### Important env vars
 
-- **Orchestration Agent**: Central coordinator that discovers services and chains tools
-- **Domain Agents**: Specialized agents for Gmail, Calendar, Todoist, and Obsidian knowledge management
-- **MCP Servers**: Secure backend services providing tool access via Model Context Protocol
-- **A2A Framework**: Service discovery and inter-agent communication layer
-- **GitHub Integration**: Direct repository access for Obsidian vault management
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `OPENAI_API_KEY` / `OPENROUTER_API_KEY` | API key for your chosen LLM | If using external LLM |
+| `GOOGLE_OAUTH_CREDENTIALS` | Path to OAuth JSON with Gmail/Calendar scopes | ✔ |
+| `TODOIST_API_TOKEN` | Todoist API token | ✔ |
+| `GITHUB_TOKEN` | Personal Access Token for your Obsidian vault repo | ✔ (Obsidian) |
+| `PORT_*` | Override default agent ports | ✖ |
 
-### Agent Communication Flow
+### Agent config (`src/agents/**/config.yml`)
 
-```
-User Query → Orchestration Agent → Service Discovery → Tool Chaining → Response
-```
-
-1. User submits natural language query
-2. Orchestration agent analyzes intent
-3. Discovers available domain agents via A2A
-4. Chains appropriate tools across services
-5. Returns unified, intelligent response
-
-### Knowledge Management Flow
-
-```
-Obsidian Query → GitHub API → Note Retrieval/Creation → Content Processing → Response
+```yaml
+name: Gmail Agent
+model: openai:gpt-4o
+host: localhost
+port: 10020
+system_prompt: |
+  You are an e-mail specialist...
 ```
 
-The Obsidian agent provides seamless access to your knowledge base stored in a GitHub repository, enabling:
-- Meeting note retrieval and search
-- Personal knowledge management
-- Project documentation access
-- Automatic note creation and updates
+Modify models, prompts or ports here.
+
+---
+
+## 🏃 Running
+
+### Individual agents (hot-reload)
+
+```bash
+uvicorn src.agents.gmail_agent.agent:app        --port 10020 --reload
+uvicorn src.agents.calendar_agent.agent:app     --port 10023 --reload
+uvicorn src.agents.todoist_agent.agent:app      --port 10022 --reload
+uvicorn src.agents.obsidian_agent.agent:app     --port 10025 --reload
+uvicorn src.agents.orchestration_agent.agent:app --port 10024 --reload
+```
+
+### Docker Compose
+
+```bash
+$ docker-compose up --build           # foreground
+$ docker-compose up -d                # detached
+```
+
+OpenAPI docs for any agent live at `http://localhost:<PORT>/docs`.
+
+---
+
+## 🖥️ Client CLI
+
+`client.py` is a minimal interactive front-end that speaks A2A over HTTP.
+
+```text
+You: "Summarise my meetings yesterday"
+Agent (thinking…):
+  Agent: You had two meetings…
+```
+
+It automatically keeps conversation context (task IDs) and prints streaming responses.
 
 ---
 
 ## 📁 Project Structure
 
 ```
-ai-asst-a2a/
-├── app.py                          # Main application launcher
-├── pyproject.toml                  # Project metadata and dependencies
-├── poetry.lock                     # Dependency lock file (updated)
-├── gcp-oauth.keys.json            # Google OAuth credentials (gitignored)
-├── logs/                          # Agent execution logs
-│   ├── calendar_agent_10023.log
-│   ├── gmail_agent_10020.log
-│   ├── obsidian_agent_10025.log
-│   ├── orchestration_agent_10024.log
-│   └── todoist_agent_10022.log
-├── src/
-│   ├── agents/                    # Agent implementations
-│   │   ├── common/               # Shared agent utilities
-│   │   │   ├── agent.py         # Base agent configuration loader
-│   │   │   ├── agent_executor.py # Agent execution framework
-│   │   │   ├── agent_manager.py # Agent lifecycle management
-│   │   │   ├── server.py        # A2A server creation utilities
-│   │   │   └── tool_client.py   # A2A client for inter-agent communication
-│   │   ├── calendar_agent/      # Google Calendar integration
-│   │   │   ├── agent.py
-│   │   │   └── config.yml
-│   │   ├── gmail_agent/         # Gmail integration
-│   │   │   ├── agent.py
-│   │   │   └── config.yml
-│   │   ├── obsidian_agent/      # Obsidian knowledge management (NEW)
-│   │   │   ├── agent.py
-│   │   │   └── config.yml
-│   │   ├── orchestration_agent/ # Central coordination
-│   │   │   ├── agent.py
-│   │   │   └── config.yml
-│   │   ├── todoist_agent/       # Task management
-│   │   │   ├── agent.py
-│   │   │   └── config.yml
-│   │   └── tools/               # Shared tools
-│   │       └── github_tools.py  # GitHub repository operations (ENHANCED)
-│   ├── core/                    # Core utilities
-│   │   ├── llms.py             # LLM client configuration
-│   │   └── logger.py           # Logging configuration
-│   └── mcp_servers/            # Model Context Protocol servers
-│       ├── gcal.py            # Google Calendar MCP server
-│       ├── gmail.py           # Gmail MCP server
-│       └── todoist.py         # Todoist MCP server
-└── dockerfile                  # Docker containerization support
-└── docker-compose.yml         # Multi-container orchestration
+ai-asst-a2a
+├── app.py                 # Launches & registers all agents
+├── client.py              # Interactive CLI
+├── docker-compose.yml
+├── dockerfile
+├── pyproject.toml         # Poetry + PEP 621 metadata
+└── src/
+    ├── agents/
+    │   ├── common/        # Shared agent infra (executor, manager, server helpers)
+    │   ├── gmail_agent/
+    │   ├── todoist_agent/
+    │   ├── calendar_agent/
+    │   ├── obsidian_agent/
+    │   └── orchestration_agent/
+    ├── core/              # llms.py, logger.py
+    └── mcp_servers/       # Low-level MCP implementations (gmail.py, gcal.py, todoist.py)
 ```
 
-### Key Components Explained
+### 🔍 Under the Hood: How the Code Fits Together
 
-- **`agents/common/`**: Shared infrastructure for agent creation, configuration, and server management
-- **`agents/obsidian_agent/`**: **NEW** - Comprehensive knowledge management with GitHub-backed Obsidian vault
-- **`tools/github_tools.py`**: **ENHANCED** - Full GitHub API integration for file operations, folder navigation, and content management
-- **`mcp_servers/`**: Secure backend services that provide tool access via the Model Context Protocol
-- **`core/`**: Fundamental utilities for LLM interaction and logging
-- **`config.yml` files**: YAML configuration for each agent defining models, prompts, and endpoints
+**1. Core plumbing (`src/agents/common/`)**
 
----
+| File | Purpose |
+|------|---------|
+| `agent.py` | Loads each agent’s `config.yml` (via `BaseAgentConfig`) and provides `run_agent_in_background()` to spin up a Uvicorn server in its own thread. |
+| `agent_manager.py` | Global registry – stores the *card-class* & *agent-instance* for every service. Returns a list that `app.py` uses to boot all agents. |
+| `server.py` | Wraps any Pydantic-AI agent into an **A2A**‐compatible Starlette app (`create_agent_a2a_server`). |
+| `agent_executor.py` | Generic executor that: ① queues an A2A task, ② spins up MCP servers (if possible), ③ calls the agent, ④ streams artifacts & status back. Includes a fallback when subprocesses aren’t allowed in background threads. |
+| `tool_client.py` | Lightweight async A2A client helpers (used by orchestration agent and tests). |
 
-## ⚙️ Configuration
+**2. Domain agent pattern**
 
-### Environment Variables
+Every folder like `gmail_agent/`, `calendar_agent/`, etc. follows the same template:
 
-All configuration is handled through environment variables:
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `OPENAI_API_KEY` | OpenAI API key | Yes (or alternative) |
-| `OPENROUTER_API_KEY` | OpenRouter API key | Alternative to OpenAI |
-| `GOOGLE_OAUTH_CREDENTIALS` | Path to Google OAuth JSON | Yes |
-| `TODOIST_API_TOKEN` | Todoist API token | Yes |
-| `GITHUB_TOKEN` | GitHub Personal Access Token | Yes (for Obsidian) |
-| `PORT_*` | Custom ports for each agent | Optional |
-
-### Agent Configuration
-
-Each agent has a `config.yml` file defining:
-
-```yaml
-name: Agent Name
-description: Agent description
-model: google-gla:gemini-2.5-flash  # or openai:gpt-4, etc.
-host: localhost
-port: PORT_NUMBER
-system_prompt: |
-  Your detailed system prompt here...
+```
+<agent_name>/
+├── agent.py      # Declares tools with @agent.tool and exports `app = agent.to_a2a()`
+├── config.yml    # Name / description / model / port / system_prompt
+└── tools.py      # Extra helpers (only when needed, e.g. Gmail API wrappers)
 ```
 
-### Google OAuth Setup
+Because all agents conform to this structure the orchestration layer can auto-discover and chain tools across services.
 
-1. Create a Google Cloud Project
-2. Enable Gmail and Calendar APIs
-3. Create OAuth 2.0 credentials
-4. Download the JSON file as `gcp-oauth.keys.json`
+**3. Application launcher (`app.py`)**
 
-### GitHub Token Setup
+1. Registers every domain agent + the orchestration agent inside the global `AgentManager`.
+2. Iterates over the registry and starts each server in its own *daemon thread*.
+3. Polls `/.well-known/agent.json` until all services report healthy, then prints the port table.
+4. Adds the running agents to a shared `a2a_client` so that agents can call each other.
 
-For Obsidian integration:
+**4. Client CLI (`client.py`)**
 
-1. Go to GitHub Settings → Developer settings → Personal access tokens
-2. Generate a new token with `repo` scope
-3. Add as `GITHUB_TOKEN` in your `.env` file
+A minimal interactive REPL that:
+* Reads the orchestration agent’s host/port from its YAML
+* Maintains `task_id` so every follow-up stays in the same context
+* Prints streaming responses or task status updates
 
----
+Great for quick manual testing without writing any code.
 
-## 🏃‍♂️ Running the System
+**5. Supporting utilities**
 
-### All Services
-
-Start all agents with a single command:
-
-```bash
-python app.py
-```
-
-This launches all agents in background threads and demonstrates inter-agent communication.
-
-### Individual Agents
-
-Run specific agents independently:
-
-```bash
-# Gmail agent only
-uvicorn src.agents.gmail_agent.agent:app --port 10020 --reload
-
-# Calendar agent only
-uvicorn src.agents.calendar_agent.agent:app --port 10023 --reload
-
-# Obsidian agent only
-uvicorn src.agents.obsidian_agent.agent:app --port 10025 --reload
-
-# Orchestration agent only
-uvicorn src.agents.orchestration_agent.agent:app --port 10024 --reload
-```
-
-### Docker Support
-
-Run the entire system in containers:
-
-```bash
-# Build and start all services
-docker-compose up --build
-
-# Run in background
-docker-compose up -d
-```
-
-### API Exploration
-
-Each agent provides:
-- **OpenAPI documentation**: `http://localhost:PORT/docs`
-- **A2A schema**: `http://localhost:PORT/.well-known/ai-plugin.json`
-- **Health check**: `http://localhost:PORT/health`
-
----
-
-## 🧠 Agent Capabilities
-
-### Obsidian Agent (NEW)
-
-**Port**: 10025 | **Purpose**: Knowledge Management
-
-**Capabilities**:
-- 📂 **Folder Navigation**: Browse your Obsidian vault structure with `list_folder_tree()`
-- 📖 **Note Reading**: Retrieve complete content from any note with `read_note()`
-- ✍️ **Note Creation**: Create new notes with `create_note()`
-- 📝 **Note Updates**: Append content to existing notes with `update_note()`
-- 🗑️ **Note Deletion**: Remove notes with `delete_note()`
-
-**Example Queries**:
-- "What did we discuss in the Q4 planning meeting?"
-- "Create a note for today's standup meeting"
-- "Show me all notes in the projects folder"
-- "Update my learning log with today's insights"
-
-### Gmail Agent
-
-**Port**: 10020 | **Purpose**: Email Management
-
-**Capabilities**:
-- 📧 Search and read emails
-- ✉️ Compose and send messages
-- 📎 Handle attachments
-- 🏷️ Label management
-
-### Calendar Agent
-
-**Port**: 10023 | **Purpose**: Calendar Management
-
-**Capabilities**:
-- 📅 Event retrieval and scheduling
-- ⏰ Meeting time analysis
-- 📍 Location and attendee management
-- 🔔 Reminder handling
-
-### Todoist Agent
-
-**Port**: 10022 | **Purpose**: Task Management
-
-**Capabilities**:
-- ✅ Task creation and completion
-- 📋 Project management
-- 🏷️ Label and filter operations
-- 📊 Progress tracking
-
-### Orchestration Agent
-
-**Port**: 10024 | **Purpose**: Coordination
-
-**Capabilities**:
-- 🔍 Service discovery
-- 🔗 Tool chaining across agents
-- 🧠 Intent analysis and routing
-- 📊 Response synthesis
+* `src/core/llms.py` – Centralises OpenAI / Anthropic / Vertex etc. client configuration.
+* `src/core/logger.py` – Configures Logfire; every thread logs to the same sink.
+* `src/mcp_servers/` – Thin wrappers exposing Gmail, Google Calendar & Todoist via **Model Context Protocol**.
 
 ---
 
 ## ➕ Adding New Agents
 
-Creating a new agent is straightforward:
+1. **Scaffold**
+   ```bash
+   mkdir -p src/agents/weather_agent
+   cp -r src/agents/common/template/* src/agents/weather_agent/
+   ```
+2. **Edit `config.yml`** – pick a model & port.
+3. **Implement `agent.py`** – declare tools with `@agent.tool` decorators.
+4. **Import & register** the agent in `app.py`.  
+   The orchestration agent will automatically discover and call it.
 
-### 1. Create Agent Structure
-
-```bash
-mkdir -p src/agents/your_agent
-touch src/agents/your_agent/__init__.py
-touch src/agents/your_agent/agent.py
-touch src/agents/your_agent/config.yml
-```
-
-### 2. Define Configuration
-
-```yaml
-# src/agents/your_agent/config.yml
-name: Your Agent
-description: Description of your agent's capabilities
-model: google-gla:gemini-2.5-flash
-host: localhost
-port: 10026
-system_prompt: |
-  You are a specialized agent for...
-```
-
-### 3. Implement Agent
-
-```python
-# src/agents/your_agent/agent.py
-from dotenv import load_dotenv
-from pydantic_ai import Agent, RunContext
-from a2a.types import AgentSkill
-from src.agents.common.agent import load_agent_config
-
-load_dotenv(override=True)
-
-config = load_agent_config("src/agents/your_agent/config.yml")
-
-class YourAgentCard:
-    name: str = config.name
-    description: str = config.description
-    skills: list[AgentSkill] = []
-    organization: str = config.name
-    host: str = config.host
-    port: int = config.port
-
-your_agent = Agent(
-    model=config.model,
-    name=config.name,
-    system_prompt=config.system_prompt,
-)
-
-@your_agent.tool
-def your_tool(ctx: RunContext, param: str) -> str:
-    """Tool description for the agent."""
-    # Your tool logic here
-    return f"Result for {param}"
-
-# Export A2A app
-app = your_agent.to_a2a()
-```
-
-### 4. Register with Main App
-
-Add your agent to `app.py`:
-
-```python
-{
-    "name": "Your Agent",
-    "agent": create_your_agent_server,
-    "port": 10026,
-}
-```
-
-The orchestration agent will automatically discover and integrate your new agent!
+> See `src/agents/obsidian_agent/` for a fully-featured reference implementation.
 
 ---
 
-## 🧑‍💻 Development
-
-### Code Quality
+## 👩‍💻 Development
 
 ```bash
-# Format code
-ruff format .
-
-# Lint code
-ruff check .
-
-# Type checking
-mypy src/
-
-# Run tests
-pytest
+# Run formatting, linting & tests
+$ ruff format . && ruff check . && mypy src && pytest
 ```
 
-### Development Dependencies
-
-Install development tools:
+Dev-extras (ruff, black, mypy, pytest) install via:
 
 ```bash
-poetry install --group dev
+poetry install --with dev
 ```
 
-Includes:
-- `ruff`: Fast Python linter and formatter
-- `pylint`: Additional linting
-- `pytest`: Testing framework
-- `mypy`: Type checking
-
-### Debugging
-
-The system includes comprehensive logging via Logfire:
-
-- **Console output**: Real-time agent activity
-- **Log files**: Detailed execution logs in `logs/` directory
-- **Logfire dashboard**: Web-based observability (optional)
-
-Enable detailed tracing by setting:
-
-```env
-LOGFIRE_TOKEN=your_token_here  # Optional for hosted Logfire
-```
-
----
-
-## 📖 API Documentation
-
-### Orchestration Agent
-
-**Endpoint**: `http://localhost:10024`
-
-**Main Tool**: `create_task(url: str, task: str) -> str`
-
-Example:
-```python
-result = await a2a_client.create_task(
-    "http://localhost:10024", 
-    "Find my urgent emails from today and check if I have any meetings"
-)
-```
-
-### Domain Agents
-
-Each domain agent exposes specialized tools:
-
-- **Gmail Agent** (`http://localhost:10020`): Email search, reading, composition
-- **Calendar Agent** (`http://localhost:10023`): Event retrieval, scheduling
-- **Todoist Agent** (`http://localhost:10022`): Task management, project operations
-- **Obsidian Agent** (`http://localhost:10025`): Knowledge management, note operations
-
-Explore the full API at each agent's `/docs` endpoint.
-
----
-
-## 🔧 Recent Updates
-
-### Version 2.0 Features
-
-- **🆕 Obsidian Agent**: Complete knowledge management with GitHub integration
-- **📈 Enhanced GitHub Tools**: Advanced repository operations and content management
-- **🔄 Improved Dependencies**: Updated Poetry lock file with latest package versions
-- **🏗️ Better Architecture**: Enhanced agent manager and execution framework
-- **🐳 Docker Support**: Full containerization with docker-compose
-
-### Breaking Changes
-
-- **Port Changes**: Obsidian agent now runs on port 10025
-- **Environment Variables**: `GITHUB_TOKEN` now required for full functionality
-- **Configuration**: Updated YAML configs with enhanced system prompts
+Logs are captured with **Logfire**; set `LOGFIRE_TOKEN` to stream to the hosted dashboard.
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Please:
+We love contributions!  
+Check [open issues](https://github.com/your-org/ai-asst-a2a/issues), create a feature branch, use conventional commits, add tests, open a PR – and join the discussion.
 
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
-
-### Contribution Guidelines
-
-- Follow the existing code style (enforced by `ruff`)
-- Add tests for new functionality
-- Update documentation as needed
-- Use conventional commit messages
-
-### Issues and Feature Requests
-
-- **Bug reports**: Use the bug report template
-- **Feature requests**: Use the feature request template
-- **Questions**: Start a discussion in the repository
+> **Code of Conduct**: By participating you agree to follow the [Contributor Covenant](https://www.contributor-covenant.org/).
 
 ---
 
-## 📄 License
+## 📅 Roadmap
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- **[Pydantic AI](https://github.com/pydantic/pydantic-ai)** for the powerful agent framework
-- **[A2A SDK](https://github.com/pydantic/agent2agent)** for seamless agent communication
-- **[Model Context Protocol](https://modelcontextprotocol.io/)** for secure tool integration
-- **[Logfire](https://pydantic.dev/logfire)** for exceptional observability
-- **Community contributors** who help make this project better
+- [ ] Replace polling health-checks with proper async readiness probes
+- [ ] Expand Obsidian agent with vector-search and embeddings
+- [ ] Add Slack / Discord notification agent
+- [ ] Automatic deployment manifests (Helm & K8s)
 
 ---
 
-**Ready to experience intelligent, privacy-first assistance? [Get started now](#-quick-start)!** 🚀
+## 📜 License
+
+Distributed under the **MIT license**. See [`LICENSE`](LICENSE) for more information.
+
+---
+
+> Built with ❤️ by [Your Name](https://github.com/your-handle) and the amazing open-source community.
