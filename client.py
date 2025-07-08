@@ -9,8 +9,6 @@ from a2a.types import (
     Role,
     MessageSendParams,
     Task,
-    TaskStatusUpdateEvent,
-    TaskArtifactUpdateEvent,
 )
 from src.agents.common.agent import (
     load_agent_config,
