@@ -2,8 +2,8 @@
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python Version](https://img.shields.io/badge/python-3.12%2B-blue)
-![GitHub issues](https://img.shields.io/github/issues/your-org/ai-asst-a2a)
-![GitHub stars](https://img.shields.io/github/stars/your-org/ai-asst-a2a)
+![GitHub issues](https://img.shields.io/github/issues/connorbell133/personal-asst-a2a)
+![GitHub stars](https://img.shields.io/github/stars/connorbell133/personal-asst-a2a)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
 > **AI Assistant A2A** is a **privacy-first, multi-agent personal assistant** built on top of [A2A SDK](https://github.com/pydantic/agent2agent) and [Pydantic AI](https://github.com/pydantic/pydantic-ai).  
@@ -46,35 +46,37 @@
 ## 🏗 Architecture
 
 ```mermaid
-flowchart LR
-    subgraph User
-        U["User Query"]
-    end
-
-    subgraph OrchestrationAgent
-        ORCH["Orchestration Agent"]
-    end
-
+flowchart TD
+    %% Groups
     subgraph DomainAgents
-        GMAIL[Gmail\nAgent]
-        CAL[Calendar\nAgent]
-        TODO[Todoist\nAgent]
-        OBSIDIAN[Obsidian\nAgent]
+        direction TB
+        gmail[Gmail Agent]
+        calendar[Calendar Agent]
+        todoist[Todoist Agent]
+        obsidian[Obsidian Agent]
     end
 
     subgraph MCPServers
-        GMAIL_MCP[Gmail MCP\nServer]
-        CAL_MCP[Calendar MCP\nServer]
-        TODO_MCP[Todoist MCP\nServer]
+        direction TB
+        gmail_mcp[Gmail MCP Server]
+        calendar_mcp[Calendar MCP Server]
+        todoist_mcp[Todoist MCP Server]
     end
 
-    U --> ORCH
-    ORCH -- "service discovery & tool chaining" --> DomainAgents
-    GMAIL --> GMAIL_MCP
-    CAL --> CAL_MCP
-    TODO --> TODO_MCP
-    OBSIDIAN --> ORCH
-    ORCH --> U
+    %% User ↔ Orchestration
+    user[User Query] -->|sends| orch[Orchestration Agent]
+    orch -->|responds| user
+
+    %% Orchestration ↔ Domain
+    orch -->|service discovery & tool chaining| gmail
+    orch --> calendar
+    orch --> todoist
+    orch --> obsidian
+
+    %% Domain ↔ MCP
+    gmail --> gmail_mcp
+    calendar --> calendar_mcp
+    todoist --> todoist_mcp
 ```
 
 ### Component Overview
