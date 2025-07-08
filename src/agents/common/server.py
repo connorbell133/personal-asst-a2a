@@ -2,6 +2,7 @@
 
 import asyncio
 import threading
+import os
 
 import uvicorn
 from a2a.server.apps import A2AStarletteApplication
@@ -74,8 +75,12 @@ async def run_uvicorn_server(create_agent_function, port):
     try:
         print(f"🚀 Starting agent on port {port}...")
         app = create_agent_function()
+
+        # Use SERVER_HOST environment variable, fallback to 0.0.0.0 for Docker compatibility
+        host = os.getenv("SERVER_HOST", "0.0.0.0")
+
         config = uvicorn.Config(
-            app.build(), host="127.0.0.1", port=port, log_level="error", loop="asyncio"
+            app.build(), host=host, port=port, log_level="error", loop="asyncio"
         )
         server = uvicorn.Server(config)
         servers.append(server)

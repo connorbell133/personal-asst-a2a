@@ -8,7 +8,8 @@ from src.agents.common.tool_client import A2AToolClient
 
 load_dotenv(override=True)
 
-a2a_client = A2AToolClient()
+# Use longer timeout for complex operations like Gmail processing
+a2a_client = A2AToolClient(default_timeout=300.0)  # 5 minutes
 
 
 orchestration_agent_config = load_agent_config(
