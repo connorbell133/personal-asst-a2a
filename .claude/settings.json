@@ -1,0 +1,46 @@
+{
+  "includeCoAuthoredBy": false,
+  "preferredNotifChannel": "terminal_bell",
+  "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
+    "DISABLE_TELEMETRY": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(npm run check:*)",
+      "Bash(npm run test:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(grep:*)",
+      "Bash(npm run preview:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(npm run seed:local:*)",
+      "Bash(git add:*)",
+      "mcp__linear-server__get_issue",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run lint)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(git commit:*)",
+      "Bash(npm test:*)",
+      "Bash(git push:*)",
+      "mcp__linear-server__get_team",
+      "mcp__linear-server__get_project",
+      "mcp__linear-server__create_issue",
+      "mcp__linear-server__update_issue",
+      "mcp__linear-server__list_issue_statuses",
+      "Bash(npm run build:*)",
+      "mcp__linear-server__list_teams",
+      "mcp__linear-server__list_projects",
+      "mcp__linear-server__list_issues",
+      "WebFetch(domain:*)"
+    ],
+    "deny": ["Bash(rm:*)", "Bash(rm -rf:*)"]
+  }
+}

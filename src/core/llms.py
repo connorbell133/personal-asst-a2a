@@ -62,17 +62,36 @@ def structured_completion(
     model: str,
     contents: str,
     response_schema: Type[BaseModel],
-) -> Type[BaseModel]:
+) -> BaseModel:
     """
     Generate a structured completion using the Google AI API.
+
+    Parameters:
+        model (str): The Google AI model identifier.
+        contents (str): The input content for generation.
+        response_schema (Type[BaseModel]): The Pydantic model class for response validation.
+
+    Returns:
+        BaseModel: A parsed response instance of the specified schema type.
+
+    Raises:
+        ValueError: If the model parameter is missing or response parsing fails.
+        RuntimeError: If an error occurs during the API call.
     """
-    response = genai_client.models.generate_content(
-        model=model,
-        contents=contents,
-        config={
-            "response_mime_type": "application/json",
-            "response_schema": response_schema,
-        },
-    )
-    parsed_response: response_schema = response.parsed
-    return parsed_response
+    if not model:
+        raise ValueError("Model parameter is required")
+
+    try:
+        response = genai_client.models.generate_content(
+            model=model,
+            contents=contents,
+            config={
+                "response_mime_type": "application/json",
+                "response_schema": response_schema,
+            },
+        )
+        if not response.parsed:
+            raise ValueError("Failed to parse structured response")
+        return response.parsed
+    except Exception as e:
+        raise RuntimeError(f"Failed to generate structured completion: {str(e)}") from e
